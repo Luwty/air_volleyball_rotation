@@ -304,13 +304,13 @@ function prevRotation(currentRotation) {
 function getStatusText(rotation, position, isFrontRow) {
   if (isFrontRow) {
     if (position === 2) {
-      return `Round ${rotation}: Setter at front row position ${position} — ideal setting spot, no penetration needed`;
+      return `第${rotation}轮：二传在前排${position}号位，理想传球位置，不需要插上`;
     } else {
-      return `Round ${rotation}: Setter at front row position ${position} — slightly off-center, but no penetration needed`;
+      return `第${rotation}轮：二传在前排${position}号位，位置稍偏，但不需要插上`;
     }
   } else {
     const route = PENETRATION_ROUTES[position];
-    return `Round ${rotation}: Setter at back row position ${position} — must penetrate! ${route.description}`;
+    return `第${rotation}轮：二传在后排${position}号位，需要插上！${route.description}`;
   }
 }
 
@@ -326,12 +326,12 @@ function getAllPlayersPositions(rotation) {
   // 1号位：二传，2号位：主攻，3号位：副攻
   // 4号位：接应，5号位：主攻，6号位：副攻(自)
   const baseRoles = {
-    1: 'S',
-    2: 'OH1',
-    3: 'MB1',
-    4: 'Opp',
-    5: 'OH2',
-    6: 'MB2'
+    1: '二传',
+    2: '大主攻',
+    3: '一副',
+    4: '接应',
+    5: '小主攻',
+    6: '二副'
   };
 
   const players = [];
@@ -349,21 +349,21 @@ function getAllPlayersPositions(rotation) {
     // 注意：这里的 basePos 3 和 6 代表的是那两名球员的"身份ID"
     // pos 代表的是他们现在站的"位置ID"
     
-    // Rule 1: player starting at position 6 (basePos === 6)
+    // 规则1: 起始在6号位的球员 (basePos === 6)
     if (basePos === 6) {
       if ([1, 5, 6].includes(pos)) {
-        roleName = 'L';   // back row = Libero
+        roleName = '自由'; // 后排叫自由
       } else {
-        roleName = 'MB2'; // front row = Middle Blocker 2
+        roleName = '二副'; // 前排叫二副
       }
     }
 
-    // Rule 2: player starting at position 3 (basePos === 3)
+    // 规则2: 起始在3号位的球员 (basePos === 3)
     if (basePos === 3) {
       if ([1, 5, 6].includes(pos)) {
-        roleName = 'L';   // back row = Libero
+        roleName = '自由'; // 后排叫自由
       } else {
-        roleName = 'MB1'; // front row = Middle Blocker 1
+        roleName = '一副'; // 前排叫一副
       }
     }
     
@@ -376,7 +376,7 @@ function getAllPlayersPositions(rotation) {
     
     let isHighlight = false;
     
-    // Highlight OH (basePos 2 or 5) when in front row (positions 2, 3, 4)
+    // 如果角色是"主攻" (basePos 2 或 5) 且 在前排 (2,3,4号位) -> 高亮
     if ((basePos === 2 || basePos === 5) && [2, 3, 4].includes(pos)) {
       isHighlight = true;
     }

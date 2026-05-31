@@ -51,7 +51,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // ========== 语言切换 ==========
 /**
- * 切换回中文版，并保留当前页面
+ * 切换到英文版（根目录），并保留当前页面
  */
 function switchLang() {
   location.href = '../index.html#' + currentPage;
@@ -127,7 +127,7 @@ function initSetterPage() {
   // 更新按钮文字
   const toggleBtn = document.getElementById('toggle-position-btn');
   if (toggleBtn) {
-    toggleBtn.textContent = 'Move ➜';
+    toggleBtn.textContent = '变化 ➜';
   }
 }
 
@@ -285,7 +285,7 @@ function updateUI() {
   // 更新轮次显示
   const rotationDisplay = document.getElementById('rotation-display');
   if (rotationDisplay) {
-    rotationDisplay.textContent = `Round ${gameState.currentRotation}`;
+    rotationDisplay.textContent = `第 ${gameState.currentRotation} 轮`;
     
     // ⚡️ 交互逻辑：如果是第1轮，允许点击设置起始位置
     if (gameState.currentRotation === 1 && !gameState.isAnimating) {
@@ -293,7 +293,7 @@ function updateUI() {
       rotationDisplay.onclick = function() {
         showStartPosModal();
       };
-      rotationDisplay.title = "Click to set setter's starting position";
+      rotationDisplay.title = "点击设置二传起始位置";
     } else {
       rotationDisplay.classList.remove('clickable');
       rotationDisplay.onclick = null;
@@ -366,11 +366,11 @@ function updateButtonStates() {
   if (nextBtn) {
     if (gameState.isAnimating) {
       nextBtn.classList.add('btn-disabled');
-      if (nextBtnText) nextBtnText.textContent = 'Loading...';
+      if (nextBtnText) nextBtnText.textContent = '动画中...';
     } else {
       nextBtn.classList.remove('btn-disabled');
       if (nextBtnText) {
-        nextBtnText.textContent = gameState.currentRotation === 6 ? 'Restart' : 'Next ▶';
+        nextBtnText.textContent = gameState.currentRotation === 6 ? '重新开始' : '下一轮 ▶';
       }
     }
   }
@@ -439,7 +439,7 @@ function playRotationAnimation(nextRot) {
   // 更新按钮文字
   const toggleBtn = document.getElementById('toggle-position-btn');
   if (toggleBtn) {
-    toggleBtn.textContent = 'Move ➜';
+    toggleBtn.textContent = '变化 ➜';
   }
 
   // 确保变回原始样式
@@ -634,7 +634,7 @@ function togglePosition() {
   // 更新按钮文字
   const toggleBtn = document.getElementById('toggle-position-btn');
   if (toggleBtn) {
-    toggleBtn.textContent = gameState.isOriginalPosition ? 'Move ➜' : 'Reset ↺';
+    toggleBtn.textContent = gameState.isOriginalPosition ? '变化 ➜' : '恢复原位 ↺';
   }
   
   // 切换场地容器的 CSS 类（控制三米线和背景数字变化）

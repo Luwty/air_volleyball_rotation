@@ -1,303 +1,335 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Volleyball Rotation Visualizer – 5-1 System & Setter Penetration</title>
-  <meta name="description" content="Free interactive volleyball rotation tool. Visualize all 6 rotations of the 5-1 system, setter penetration paths and libero swaps, and rename players for your own team.">
-  <meta name="keywords" content="volleyball rotation, 5-1 rotation, setter penetration, volleyball positions, libero, volleyball rotation visualizer, volleyball lineup">
+  <meta name="description" content="排球二传插上教学 - 帮助初高中女排学员理解二传插上技术">
+  <title>排球轮次站位教学 - 5-1阵型与二传插上可视化</title>
 
   <!-- Canonical & language alternates -->
-  <link rel="canonical" href="https://jerrypeibuilds.github.io/volleyball-setter/">
-  <link rel="alternate" hreflang="en" href="https://jerrypeibuilds.github.io/volleyball-setter/">
+  <link rel="canonical" href="https://jerrypeibuilds.github.io/volleyball-setter/zh/">
   <link rel="alternate" hreflang="zh-Hans" href="https://jerrypeibuilds.github.io/volleyball-setter/zh/">
+  <link rel="alternate" hreflang="en" href="https://jerrypeibuilds.github.io/volleyball-setter/">
   <link rel="alternate" hreflang="x-default" href="https://jerrypeibuilds.github.io/volleyball-setter/">
 
-  <!-- Open Graph / social share -->
-  <meta property="og:type" content="website">
-  <meta property="og:title" content="Volleyball Rotation Visualizer – 5-1 System & Setter Penetration">
-  <meta property="og:description" content="Free interactive tool to visualize all 6 rotations of the 5-1 system, setter penetration and libero swaps. Rename players for your own team.">
-  <meta property="og:url" content="https://jerrypeibuilds.github.io/volleyball-setter/">
-  <meta property="og:site_name" content="Volleyball Rotation Visualizer">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="Volleyball Rotation Visualizer – 5-1 System & Setter Penetration">
-  <meta name="twitter:description" content="Free interactive volleyball rotation tool: 5-1 system, setter penetration, libero swaps, custom player names.">
-
-  <!-- Structured data: free web app -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "WebApplication",
-    "name": "Volleyball Rotation Visualizer",
-    "url": "https://jerrypeibuilds.github.io/volleyball-setter/",
-    "applicationCategory": "SportsApplication",
-    "operatingSystem": "Web browser",
-    "description": "Free interactive volleyball rotation tool. Visualize all 6 rotations of the 5-1 system, setter penetration paths and libero swaps, and rename players for your own team.",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
-  }
-  </script>
-
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <!-- Language switch button (fixed top-right, visible on all pages) -->
-  <div class="lang-switch" onclick="switchLang()">中文</div>
+  <!-- 语言切换按钮（固定右上角，所有页面可见） -->
+  <div class="lang-switch" onclick="switchLang()">EN</div>
 
-  <!-- Home Page -->
+  <!-- 首页 -->
   <div id="index-page" class="page active">
     <div class="container index-container">
+      <!-- 顶部装饰 -->
       <div class="header-decoration">
         <span class="volleyball-icon">🏐</span>
       </div>
 
+      <!-- 主标题 -->
       <div class="title-wrapper fade-in">
-        <h1 class="main-title">Volleyball Rotation Guide</h1>
+        <h1 class="main-title">排球轮次站位教学</h1>
         <p class="subtitle"></p>
       </div>
 
+      <!-- 功能按钮组 -->
       <div class="button-group">
+        <!-- 开始学习按钮 -->
         <div class="btn btn-primary" onclick="goToSetter()">
-          <span>Start</span>
+          <span>开始学习</span>
         </div>
+
+        <!-- 规则说明按钮 -->
         <div class="btn btn-secondary" onclick="goToTutorial()" style="display: none;">
-          <span>Rules</span>
+          <span>规则说明</span>
         </div>
       </div>
 
+      <!-- 底部说明 -->
       <div class="footer-info">
+        <p class="info-text"></p>
         <p class="info-text"></p>
       </div>
     </div>
   </div>
 
-  <!-- Tutorial Page -->
+  <!-- 规则说明页 -->
   <div id="tutorial-page" class="page">
     <div class="container tutorial-container">
+      <!-- 返回按钮 -->
       <div class="nav-back" onclick="goBack()">
-        <span>← Back</span>
+        <span>← 返回</span>
       </div>
 
+      <!-- 标题 -->
       <div class="page-title">
-        <h1 class="title">Setter Penetration Rules</h1>
+        <h1 class="title">二传插上规则说明</h1>
       </div>
 
+      <!-- 规则卡片1：基础概念 -->
       <div class="card fade-in">
         <div class="card-title">
           <span class="title-icon">📍</span>
-          <span class="title-text">What is Setter Penetration?</span>
+          <span class="title-text">什么是二传插上？</span>
         </div>
         <div class="card-content">
           <p class="content-text">
-            Setter penetration is a key technique in volleyball. When the setter rotates to the back row, they must quickly move to the front row (between positions 2-3) after the serve to maintain the ideal setting position.
+            二传插上是排球比赛中的重要技术。当二传手轮转到后排位置时，为了保持最佳的传球位置（前排2-3号位之间），需要在发球后快速移动到前排，这个动作就叫做"插上"。
           </p>
         </div>
       </div>
 
+      <!-- 规则卡片2：位置说明 -->
       <div class="card fade-in">
         <div class="card-title">
           <span class="title-icon">🎯</span>
-          <span class="title-text">The 6 Court Positions</span>
+          <span class="title-text">场上6个位置</span>
         </div>
         <div class="card-content">
           <div class="position-diagram">
             <div class="position-row front-row">
               <div class="position-item">
                 <span class="position-number">④</span>
-                <span class="position-name">Left Front</span>
+                <span class="position-name">左前</span>
               </div>
               <div class="position-item">
                 <span class="position-number">③</span>
-                <span class="position-name">Middle Front</span>
+                <span class="position-name">中前</span>
               </div>
               <div class="position-item">
                 <span class="position-number">②</span>
-                <span class="position-name">Right Front</span>
+                <span class="position-name">右前</span>
               </div>
             </div>
             <div class="net-line">
-              <span>══════ NET ══════</span>
+              <span>══════ 球网 ══════</span>
             </div>
             <div class="position-row back-row">
               <div class="position-item">
                 <span class="position-number">⑤</span>
-                <span class="position-name">Left Back</span>
+                <span class="position-name">左后</span>
               </div>
               <div class="position-item">
                 <span class="position-number">⑥</span>
-                <span class="position-name">Middle Back</span>
+                <span class="position-name">中后</span>
               </div>
               <div class="position-item">
                 <span class="position-number">①</span>
-                <span class="position-name">Right Back</span>
+                <span class="position-name">右后</span>
               </div>
             </div>
           </div>
           <p class="content-text" style="margin-top: 20px;">
-            Front row: positions 2, 3, 4 (attack near the net)<br>
-            Back row: positions 1, 5, 6 (mainly defense)
+            前排：2、3、4号位（可以在网前进攻）<br>
+            后排：1、5、6号位（主要负责防守）
           </p>
         </div>
       </div>
 
+      <!-- 规则卡片3：前排vs后排 -->
       <div class="card fade-in">
         <div class="card-title">
           <span class="title-icon">🔄</span>
-          <span class="title-text">Front Row vs Back Row</span>
+          <span class="title-text">前排 vs 后排</span>
         </div>
         <div class="card-content">
           <div class="compare-section">
             <div class="compare-item">
-              <p class="compare-title">✅ Setter in Front Row</p>
-              <p class="compare-text">Ideal position — can set directly without penetrating</p>
+              <p class="compare-title">✅ 二传在前排</p>
+              <p class="compare-text">位置理想，可以直接传球，不需要插上</p>
             </div>
             <div class="compare-item">
-              <p class="compare-title">⚠️ Setter in Back Row</p>
-              <p class="compare-text">Too far from the net — must penetrate to front row after the serve</p>
+              <p class="compare-title">⚠️ 二传在后排</p>
+              <p class="compare-text">距离网太远，必须在发球后插上到前排进行传球</p>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- 规则卡片4：为什么需要插上 -->
       <div class="card fade-in">
         <div class="card-title">
           <span class="title-icon">💡</span>
-          <span class="title-text">Why Penetrate?</span>
+          <span class="title-text">为什么需要插上？</span>
         </div>
         <div class="card-content">
           <div class="reason-list">
             <div class="reason-item">
               <span class="reason-number">1</span>
-              <span class="reason-text">Maintain the best setting position to feed OH and MB</span>
+              <span class="reason-text">保持最佳传球位置，方便给主攻和副攻传球</span>
             </div>
             <div class="reason-item">
               <span class="reason-number">2</span>
-              <span class="reason-text">React quickly to improve attack efficiency</span>
+              <span class="reason-text">快速响应，提高进攻效率</span>
             </div>
             <div class="reason-item">
               <span class="reason-number">3</span>
-              <span class="reason-text">Keep the offensive system consistent every rotation</span>
+              <span class="reason-text">保持战术体系的稳定性</span>
             </div>
           </div>
         </div>
       </div>
 
+      <!-- 规则卡片5：插上时机 -->
       <div class="card fade-in">
         <div class="card-title">
           <span class="title-icon">⏰</span>
-          <span class="title-text">When to Penetrate?</span>
+          <span class="title-text">什么时候插上？</span>
         </div>
         <div class="card-content">
           <p class="content-text highlight-text">
-            ⚡ Penetrate immediately after the serve!
+            ⚡ 发球后立即插上！
           </p>
           <p class="content-text">
-            Note: Before the serve, back-row players must stay behind their corresponding front-row players. Movement is free after the serve.
+            注意：发球前不能越位（后排队员不能站在前排队员前面），发球后才能自由移动。
           </p>
         </div>
       </div>
 
+      <!-- 开始学习按钮 -->
       <div class="bottom-actions">
         <div class="btn btn-primary" onclick="goToSetter()">
-          <span>Start Practicing</span>
+          <span>开始学习插上技术</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Court Page -->
+  <!-- 二传插上主页面 -->
   <div id="setter-page" class="page">
     <div class="container setter-container">
+      <!-- 返回按钮 -->
       <div class="nav-back" onclick="goBack()">
-        <span>← Back</span>
+        <span>← 返回</span>
       </div>
 
+      <!-- 顶部信息栏 -->
       <div class="top-info">
         <div class="rotation-info">
-          <span class="rotation-label">Rotation: </span>
-          <span class="rotation-value" id="rotation-display">Round 1</span>
-          <span class="serve-icon" id="serve-indicator" style="display: none;">Pipe</span>
-          <span class="actual-pos-label" id="actual-pos-label" style="display: none;">Receive Formation</span>
+          <span class="rotation-label">当前轮次：</span>
+          <span class="rotation-value" id="rotation-display">第 1 轮</span>
+          <span class="serve-icon" id="serve-indicator" style="display: none;">反轮</span>
+          <span class="actual-pos-label" id="actual-pos-label" style="display: none;">实际接发球站位</span>
         </div>
       </div>
 
+      <!-- 球场区域 -->
       <div class="court-wrapper">
         <div class="court-container" id="court">
-          <div id="court-label-1" class="position-label" style="left: 83.3%; top: 74%;">1</div>
-          <div id="court-label-2" class="position-label front-row" style="left: 83.3%; top: 26%;">2</div>
-          <div id="court-label-3" class="position-label front-row" style="left: 50%; top: 26%;">3</div>
-          <div id="court-label-4" class="position-label front-row" style="left: 16.7%; top: 26%;">4</div>
-          <div id="court-label-5" class="position-label" style="left: 16.7%; top: 74%;">5</div>
-          <div id="court-label-6" class="position-label" style="left: 50%; top: 74%;">6</div>
-
+      <!-- 位置区域标注（浅色背景数字，固定在场地上） -->
+      <div id="court-label-1" class="position-label" style="left: 83.3%; top: 74%;">1</div>  <!-- 右后角 -->
+      <div id="court-label-2" class="position-label front-row" style="left: 83.3%; top: 26%;">2</div>  <!-- 右前角 -->
+      <div id="court-label-3" class="position-label front-row" style="left: 50%; top: 26%;">3</div>  <!-- 中前 -->
+      <div id="court-label-4" class="position-label front-row" style="left: 16.7%; top: 26%;">4</div>  <!-- 左前角 -->
+      <div id="court-label-5" class="position-label" style="left: 16.7%; top: 74%;">5</div>  <!-- 左后角 -->
+      <div id="court-label-6" class="position-label" style="left: 50%; top: 74%;">6</div>  <!-- 中后 -->
+          
+          <!-- Canvas用于绘制插上路线箭头 -->
           <canvas id="penetration-canvas" class="penetration-canvas" width="600" height="800"></canvas>
+
+          <!-- 球网 -->
           <div class="net"></div>
+
+          <!-- 6个位置的球员（由JavaScript动态创建） -->
           <div id="players-container"></div>
 
+          <!-- 二传插上后的虚影 -->
           <div id="setter-shadow" class="player player-shadow" style="display: none;">
             <div class="player-content">
               <span class="player-number" id="shadow-number"></span>
-              <span class="player-role">Start</span>
+              <span class="player-role">起始</span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Rename hint -->
-      <div class="edit-hint">💡 Tap any player to set a real name</div>
+      <!-- 提示信息 (已移除) -->
+      <!--
+      <div class="tip" id="status-tip">
+        <span class="tip-icon">💡</span>
+        <span class="tip-text" id="status-text">二传在前排2号位，理想传球位置，不需要插上</span>
+      </div>
+      -->
 
+      <!-- 改名提示 -->
+      <div class="edit-hint">💡 点击任意球员，可改成真实姓名</div>
+
+      <!-- 控制按钮 -->
       <div class="control-panel">
         <div class="button-row">
           <div class="btn btn-control" id="prev-btn" onclick="prevRotation()">
-            <span>◀ Prev</span>
+            <span>◀ 上一轮</span>
           </div>
           <div class="btn btn-control btn-primary" id="next-btn" onclick="nextRotation()">
-            <span id="next-btn-text">Next ▶</span>
+            <span id="next-btn-text">下一轮 ▶</span>
           </div>
         </div>
+        <!-- 站位切换按钮 -->
         <div class="button-row" style="margin-top: 1.25rem;">
           <div class="btn btn-control btn-secondary" id="toggle-position-btn" onclick="togglePosition()">
-            Move ➜
+            变化 ➜
           </div>
         </div>
       </div>
 
+      <!-- 开关设置 (已移除) -->
+      <!--
+      <div class="settings-panel card">
+        <div class="settings-title">
+          <span>显示设置</span>
+        </div>
+        <div class="switch-item">
+          <span class="switch-label">显示插上路线</span>
+          <label class="switch">
+            <input type="checkbox" id="route-switch" checked onchange="onRouteSwitch()">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+      -->
+
+      <!-- 规则说明按钮 -->
       <div class="help-button" onclick="goToTutorial()" style="display: none;">
-        <span>❓ View Rules</span>
+        <span>❓ 查看规则说明</span>
       </div>
     </div>
   </div>
 
-  <!-- Back Rotation Modal -->
+  <!-- 反轮解释模态框 -->
   <div id="rotation-modal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <span class="modal-icon">🏐</span>
-        <span class="modal-title">What is Pipe Rotation?</span>
+        <span class="modal-title">什么是反轮？</span>
         <span class="close-modal" onclick="closeModal()">×</span>
       </div>
       <div class="modal-body">
-        <p>Pipe rotation means the <strong>Opposite</strong> has rotated to <strong>position 4</strong> in the front row.</p>
-        <p>So when <strong>receiving serve</strong>, they attack from <strong>position 4</strong>.</p>
+        <p>反轮是指在排球轮转中，<strong>接应</strong>轮转到了前排的<strong>4号位</strong>。</p>
+        <p>所以<strong>接发球时</strong>他需要在<strong>4号位</strong>进攻。</p>
       </div>
     </div>
   </div>
 
-  <!-- Starting Position Modal -->
+  <!-- 开轮位置选择模态框 -->
   <div id="start-pos-modal" class="modal">
     <div class="modal-content modal-picker">
       <div class="modal-header">
         <span class="modal-icon">⚙️</span>
-        <span class="modal-title">Set Starting Position</span>
+        <span class="modal-title">设置起始位置</span>
         <span class="close-modal" onclick="closeStartPosModal()">×</span>
       </div>
       <div class="modal-body picker-body">
+        
         <div class="picker-sentence">
-          <span>Setter starts at position</span>
-
+          <span>你想要让二传在</span>
+          
+          <!-- 滚轮组件 -->
           <div class="wheel-container">
-            <div class="wheel-highlight"></div>
+            <div class="wheel-highlight"></div> <!-- 中间的高亮框 -->
             <div class="wheel-scroll" id="pos-wheel" onscroll="checkWheelSelection()">
+              <!-- 前后加空项是为了让数字能滚到正中间 -->
               <div class="wheel-item placeholder"></div>
+              <!-- 顺序：1, 6, 5, 4, 3, 2 (对应 offset 0, 1, 2, 3, 4, 5) -->
               <div class="wheel-item" data-val="1">1</div>
               <div class="wheel-item" data-val="6">6</div>
               <div class="wheel-item" data-val="5">5</div>
@@ -307,17 +339,19 @@
               <div class="wheel-item placeholder"></div>
             </div>
           </div>
-
-          <span>?</span>
+          
+          <span>号位开始？</span>
         </div>
-
+        
         <div class="btn btn-primary btn-small" onclick="confirmWheelSelection()" style="margin-top: 20px; height: 3.5rem; line-height: 3.5rem; font-size: 1.5rem;">
-          Confirm
+          确定
         </div>
+
       </div>
     </div>
   </div>
 
+  <!-- JavaScript -->
   <script src="js/rotation.js"></script>
   <script src="js/app.js"></script>
 </body>
