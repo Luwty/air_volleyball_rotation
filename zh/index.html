@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -14,6 +15,7 @@
 
   <link rel="stylesheet" href="../css/style.css">
 </head>
+
 <body>
   <!-- 语言切换按钮（固定右上角，所有页面可见） -->
   <div class="lang-switch" onclick="switchLang()">EN</div>
@@ -216,14 +218,13 @@
       <!-- 球场区域 -->
       <div class="court-wrapper">
         <div class="court-container" id="court">
-      <!-- 位置区域标注（浅色背景数字，固定在场地上） -->
-      <div id="court-label-1" class="position-label" style="left: 83.3%; top: 74%;">1</div>  <!-- 右后角 -->
-      <div id="court-label-2" class="position-label front-row" style="left: 83.3%; top: 26%;">2</div>  <!-- 右前角 -->
-      <div id="court-label-3" class="position-label front-row" style="left: 50%; top: 26%;">3</div>  <!-- 中前 -->
-      <div id="court-label-4" class="position-label front-row" style="left: 16.7%; top: 26%;">4</div>  <!-- 左前角 -->
-      <div id="court-label-5" class="position-label" style="left: 16.7%; top: 74%;">5</div>  <!-- 左后角 -->
-      <div id="court-label-6" class="position-label" style="left: 50%; top: 74%;">6</div>  <!-- 中后 -->
-          
+          <!-- 位置区域标注（浅色背景数字，固定在场地上） -->
+          <div id="court-label-1" class="position-label" style="left: 83.3%; top: 74%;">1</div> <!-- 右后角 -->
+          <div id="court-label-2" class="position-label front-row" style="left: 83.3%; top: 26%;">2</div> <!-- 右前角 -->
+          <div id="court-label-3" class="position-label front-row" style="left: 50%; top: 26%;">3</div> <!-- 中前 -->
+          <div id="court-label-4" class="position-label front-row" style="left: 16.7%; top: 26%;">4</div> <!-- 左前角 -->
+          <div id="court-label-5" class="position-label" style="left: 16.7%; top: 74%;">5</div> <!-- 左后角 -->
+
           <!-- Canvas用于绘制插上路线箭头 -->
           <canvas id="penetration-canvas" class="penetration-canvas" width="600" height="800"></canvas>
 
@@ -319,10 +320,10 @@
         <span class="close-modal" onclick="closeStartPosModal()">×</span>
       </div>
       <div class="modal-body picker-body">
-        
+
         <div class="picker-sentence">
           <span>你想要让二传在</span>
-          
+
           <!-- 滚轮组件 -->
           <div class="wheel-container">
             <div class="wheel-highlight"></div> <!-- 中间的高亮框 -->
@@ -331,7 +332,6 @@
               <div class="wheel-item placeholder"></div>
               <!-- 顺序：1, 6, 5, 4, 3, 2 (对应 offset 0, 1, 2, 3, 4, 5) -->
               <div class="wheel-item" data-val="1">1</div>
-              <div class="wheel-item" data-val="6">6</div>
               <div class="wheel-item" data-val="5">5</div>
               <div class="wheel-item" data-val="4">4</div>
               <div class="wheel-item" data-val="3">3</div>
@@ -339,11 +339,12 @@
               <div class="wheel-item placeholder"></div>
             </div>
           </div>
-          
+
           <span>号位开始？</span>
         </div>
-        
-        <div class="btn btn-primary btn-small" onclick="confirmWheelSelection()" style="margin-top: 20px; height: 3.5rem; line-height: 3.5rem; font-size: 1.5rem;">
+
+        <div class="btn btn-primary btn-small" onclick="confirmWheelSelection()"
+          style="margin-top: 20px; height: 3.5rem; line-height: 3.5rem; font-size: 1.5rem;">
           确定
         </div>
 
@@ -355,4 +356,5 @@
   <script src="js/rotation.js"></script>
   <script src="js/app.js"></script>
 </body>
+
 </html>
