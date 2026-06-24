@@ -20,6 +20,26 @@
   <!-- 语言切换按钮（固定右上角，所有页面可见） -->
   <div class="lang-switch" onclick="switchLang()">EN</div>
 
+  <!-- 左侧抽屉：默认折叠，可编辑自定义笔记 -->
+  <aside id="side-drawer" class="side-drawer">
+    <div class="drawer-panel">
+      <div class="drawer-header">
+        <span>自定义内容</span>
+        <button class="drawer-close" onclick="toggleDrawer(false)">收起</button>
+      </div>
+
+      <textarea
+        id="drawer-note"
+        class="drawer-note"
+        maxlength="500"
+        placeholder="这里可以记录队员说明、站位备注或训练重点"
+        oninput="saveDrawerNote()"
+      ></textarea>
+    </div>
+
+    <button class="drawer-toggle" onclick="toggleDrawer()">备注</button>
+  </aside>
+
   <!-- 首页 -->
   <div id="index-page" class="page active">
     <div class="container index-container">
@@ -219,11 +239,11 @@
       <div class="court-wrapper">
         <div class="court-container" id="court">
           <!-- 位置区域标注（浅色背景数字，固定在场地上） -->
-          <div id="court-label-1" class="position-label" style="left: 83.3%; top: 74%;">1</div> <!-- 右后角 -->
+          <div id="court-label-1" class="position-label" style="left: 66.7%; top: 74%;">1</div> <!-- 右后角 -->
           <div id="court-label-2" class="position-label front-row" style="left: 83.3%; top: 26%;">2</div> <!-- 右前角 -->
           <div id="court-label-3" class="position-label front-row" style="left: 50%; top: 26%;">3</div> <!-- 中前 -->
           <div id="court-label-4" class="position-label front-row" style="left: 16.7%; top: 26%;">4</div> <!-- 左前角 -->
-          <div id="court-label-5" class="position-label" style="left: 16.7%; top: 74%;">5</div> <!-- 左后角 -->
+          <div id="court-label-5" class="position-label" style="left: 33.3%; top: 74%;">5</div> <!-- 左后角 -->
 
           <!-- Canvas用于绘制插上路线箭头 -->
           <canvas id="penetration-canvas" class="penetration-canvas" width="600" height="800"></canvas>
@@ -265,13 +285,18 @@
             <span id="next-btn-text">下一轮 ▶</span>
           </div>
         </div>
-        <!-- 站位切换按钮 -->
-        <div class="button-row" style="margin-top: 1.25rem;">
-          <div class="btn btn-control btn-secondary" id="toggle-position-btn" onclick="togglePosition()">
-            变化 ➜
+        <!-- 变化/恢复原位 + 编辑/保存：基础模式只显示变化；变化模式显示 2:1 两按钮 -->
+        <div class="button-row position-action-row" id="position-action-row" style="margin-top: 1.25rem;">
+          <div class="btn btn-control btn-secondary position-toggle-btn" id="toggle-position-btn" onclick="togglePosition()">
+            变化 →
+          </div>
+          <div class="btn btn-control btn-secondary position-edit-btn" id="edit-position-btn" onclick="togglePositionEdit()">
+            编辑
           </div>
         </div>
       </div>
+
+      
 
       <!-- 开关设置 (已移除) -->
       <!--

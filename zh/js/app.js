@@ -26,7 +26,9 @@ let gameState = {
 };
 
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
-const CUSTOM_NAMES_KEY = 'air_volleyball_5_custom_names'; // 更换了姓名存储键
+const CUSTOM_NAMES_KEY = 'air_volleyball_5_custom_names';
+const CUSTOM_POSITIONS_KEY = 'air_volleyball_5_custom_positions';
+const DRAWER_NOTE_KEY = 'air_volleyball_5_drawer_note';
 
 
 // ========== 新增可编辑逻辑 ==========
@@ -47,6 +49,31 @@ function saveCustomPositions() {
   );
 }
 
+// ========== 左侧自定义抽屉 ==========
+function toggleDrawer(forceOpen) {
+  const drawer = document.getElementById('side-drawer');
+  if (!drawer) return;
+
+  const shouldOpen = typeof forceOpen === 'boolean'
+    ? forceOpen
+    : !drawer.classList.contains('open');
+
+  drawer.classList.toggle('open', shouldOpen);
+}
+
+function loadDrawerNote() {
+  const note = document.getElementById('drawer-note');
+  if (!note) return;
+
+  note.value = localStorage.getItem(DRAWER_NOTE_KEY) || '';
+}
+
+function saveDrawerNote() {
+  const note = document.getElementById('drawer-note');
+  if (!note) return;
+
+  localStorage.setItem(DRAWER_NOTE_KEY, note.value);
+}
 
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
 function loadCustomNames() {
@@ -67,6 +94,7 @@ document.addEventListener('DOMContentLoaded', function () {
   console.log('排球二传插上教学 - Web版已加载');
   loadCustomNames();
   loadCustomPositions();
+  loadDrawerNote();
   // 读取 hash，支持切换语言后停留在同一页面
   let initial = (location.hash || '').replace('#', '');
   if (!['index', 'tutorial', 'setter'].includes(initial)) {
@@ -150,11 +178,11 @@ function initSetterPage() {
   // 更新UI
   updateUI();
 
-  // 更新按钮文字
-  const toggleBtn = document.getElementById('toggle-position-btn');
-  if (toggleBtn) {
-    toggleBtn.textContent = '变化 ➜';
-  }
+  // // 更新按钮文字
+  // const toggleBtn = document.getElementById('toggle-position-btn');
+  // if (toggleBtn) {
+  //   toggleBtn.textContent = '变化 ➜';
+  // }
 }
 
 /**
@@ -209,14 +237,16 @@ function renderPlayers() {
 
   gameState.players.forEach(player => {
     // 根据当前状态决定使用哪个坐标
-    let coords;
-    if (gameState.isOriginalPosition) {
-      // 原始站位：使用标准位置坐标
-      coords = getPositionCoords(player.position);
-    } else {
-      // 实际接发球站位：使用计算后的坐标（含插上等）
-      coords = player.coords;
-    }
+    // let coords;
+    // if (gameState.isOriginalPosition) {
+    //   // 原始站位：使用标准位置坐标
+    //   coords = getPositionCoords(player.position);
+    // } else {
+    //   // 实际接发球站位：使用计算后的坐标（含插上等）
+    //   coords = player.coords;
+    // }
+    // 原始模式使用标准站位；变化模式优先使用自定义/编辑中的坐标
+    const coords = getPlayerRenderCoords(player);
 
     // 尝试查找现有球员元素 (使用新的唯一 ID)
     let playerDiv = document.getElementById(player.id);
@@ -267,8 +297,11 @@ function renderPlayers() {
       </div>
     `;
 
+    bindPlayerDrag(playerDiv, player);
+
     // 单击进入编辑模式（改成真实球员姓名，移动端单点即可）
     playerDiv.onclick = function (e) {
+      if (gameState.isEditingPositions) return; // 拖动编辑时不触发改名
       e.stopPropagation();
       const roleSpan = playerDiv.querySelector('.player-role');
       if (!roleSpan || playerDiv.querySelector('.player-name-input')) return;
@@ -357,6 +390,9 @@ function updateUI() {
     }
   }
 
+  // 新增更新编辑按钮
+  updatePositionActionButtons();
+
   // 更新按钮状态
   updateButtonStates();
 
@@ -370,6 +406,37 @@ function updateUI() {
     clearCanvas();
   } else {
     clearCanvas();
+  }
+}
+
+/**
+ * 更新编辑按钮
+ */
+function updatePositionActionButtons() {
+  const row = document.getElementById('position-action-row');
+  const toggleBtn = document.getElementById('toggle-position-btn');
+  const editBtn = document.getElementById('edit-position-btn');
+  const court = document.getElementById('court');
+
+  const isVariationMode = !gameState.isOriginalPosition;
+  const isEditing = gameState.isEditingPositions;
+
+  if (row) {
+    row.classList.toggle('variation-mode', isVariationMode);
+    row.classList.toggle('editing-mode', isEditing);
+  }
+
+  if (toggleBtn) {
+    toggleBtn.textContent = isVariationMode ? '恢复原位 ←' : '变化 →';
+  }
+
+  if (editBtn) {
+    editBtn.textContent = isEditing ? '保存' : '编辑';
+  }
+
+  if (court) {
+    court.classList.toggle('variation', isVariationMode);
+    court.classList.toggle('position-editing', isEditing);
   }
 }
 
@@ -462,17 +529,20 @@ function playRotationAnimation(nextRot) {
   // 重置为原始站位模式
   gameState.isOriginalPosition = true;
 
-  // 更新按钮文字
-  const toggleBtn = document.getElementById('toggle-position-btn');
-  if (toggleBtn) {
-    toggleBtn.textContent = '变化 ➜';
-  }
+  gameState.isEditingPositions = false;
+  gameState.draftPositions = {};
 
-  // 确保变回原始样式
-  const courtContainer = document.querySelector('.court-container');
-  if (courtContainer) {
-    courtContainer.classList.remove('variation');
-  }
+  // // 更新按钮文字
+  // const toggleBtn = document.getElementById('toggle-position-btn');
+  // if (toggleBtn) {
+  //   toggleBtn.textContent = '变化 ➜';
+  // }
+
+  // // 确保变回原始样式
+  // const courtContainer = document.querySelector('.court-container');
+  // if (courtContainer) {
+  //   courtContainer.classList.remove('variation');
+  // }
 
   // 更新轮次
   gameState.currentRotation = nextRot;
@@ -646,36 +716,172 @@ function drawArrowHead(ctx, endX, endY, controlX, controlY) {
   ctx.restore();
 }
 
+// ========== 站位编辑函数 ==========
+
+function getCurrentEffectiveRotation() {
+  return getEffectiveRotation(gameState.currentRotation);
+}
+
+function clonePositionMap(map) {
+  return JSON.parse(JSON.stringify(map || {}));
+}
+
+function getPositionBucket(source, rotation) {
+  const key = String(rotation);
+  if (!source[key]) source[key] = {};
+  return source[key];
+}
+
+function getPlayerRenderCoords(player) {
+  if (gameState.isOriginalPosition) {
+    return getPositionCoords(player.position);
+  }
+
+  const rotation = String(getCurrentEffectiveRotation());
+  const pos = String(player.position);
+
+  return (
+    gameState.draftPositions[rotation]?.[pos] ||
+    gameState.customPositions[rotation]?.[pos] ||
+    player.coords
+  );
+}
+
+function beginPositionEdit() {
+  gameState.isEditingPositions = true;
+  gameState.draftPositions = clonePositionMap(gameState.customPositions);
+
+  const rotation = getCurrentEffectiveRotation();
+  const bucket = getPositionBucket(gameState.draftPositions, rotation);
+
+  gameState.players.forEach(player => {
+    const pos = String(player.position);
+    if (!bucket[pos]) {
+      bucket[pos] = getPlayerRenderCoords(player);
+    }
+  });
+}
+
+function savePositionDraft() {
+  const rotation = getCurrentEffectiveRotation();
+  const bucket = getPositionBucket(gameState.draftPositions, rotation);
+
+  // 保存前从 DOM 再读一次，避免刚拖完马上点保存时坐标没同步
+  gameState.players.forEach(player => {
+    const el = document.getElementById(player.id);
+    if (!el) return;
+
+    bucket[String(player.position)] = {
+      x: Number((parseFloat(el.style.left) || 0).toFixed(1)),
+      y: Number((parseFloat(el.style.top) || 0).toFixed(1))
+    };
+  });
+
+  gameState.customPositions = clonePositionMap(gameState.draftPositions);
+  saveCustomPositions();
+}
+
+function exitPositionEdit() {
+  gameState.isEditingPositions = false;
+  gameState.draftPositions = {};
+}
+
+function togglePositionEdit() {
+  if (gameState.isOriginalPosition) return;
+
+  if (gameState.isEditingPositions) {
+    savePositionDraft();
+    exitPositionEdit();
+
+    // 先退出编辑样式，再重新渲染，保证球员移动动画恢复
+    updateUI();
+    renderPlayers();
+    return;
+  }
+
+  beginPositionEdit();
+  updateUI();
+  renderPlayers();
+}
+
+function bindPlayerDrag(playerDiv, player) {
+  playerDiv.onpointerdown = null;
+
+  const canDrag = gameState.isEditingPositions && !gameState.isOriginalPosition;
+  playerDiv.style.touchAction = canDrag ? 'none' : '';
+
+  if (!canDrag) return;
+
+  playerDiv.onpointerdown = function (e) {
+    if (e.button !== undefined && e.button !== 0) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const court = document.getElementById('court');
+    if (!court) return;
+
+    const rect = court.getBoundingClientRect();
+    const currentX = parseFloat(playerDiv.style.left) || 50;
+    const currentY = parseFloat(playerDiv.style.top) || 50;
+    const startPointerX = ((e.clientX - rect.left) / rect.width) * 100;
+    const startPointerY = ((e.clientY - rect.top) / rect.height) * 100;
+    const offsetX = currentX - startPointerX;
+    const offsetY = currentY - startPointerY;
+
+    const radiusX = (playerDiv.offsetWidth / 2 / rect.width) * 100;
+    const radiusY = (playerDiv.offsetHeight / 2 / rect.height) * 100;
+
+    playerDiv.setPointerCapture?.(e.pointerId);
+    playerDiv.classList.add('dragging');
+
+    const moveTo = evt => {
+      const pointerX = ((evt.clientX - rect.left) / rect.width) * 100;
+      const pointerY = ((evt.clientY - rect.top) / rect.height) * 100;
+
+      const next = {
+        x: Math.min(100 - radiusX, Math.max(radiusX, Number((pointerX + offsetX).toFixed(1)))),
+        y: Math.min(100 - radiusY, Math.max(radiusY, Number((pointerY + offsetY).toFixed(1))))
+      };
+
+      const rotation = getCurrentEffectiveRotation();
+      const bucket = getPositionBucket(gameState.draftPositions, rotation);
+      bucket[String(player.position)] = next;
+
+      playerDiv.style.left = next.x + '%';
+      playerDiv.style.top = next.y + '%';
+    };
+
+    const stop = () => {
+      playerDiv.classList.remove('dragging');
+      playerDiv.releasePointerCapture?.(e.pointerId);
+      playerDiv.removeEventListener('pointermove', moveTo);
+      playerDiv.removeEventListener('pointerup', stop);
+      playerDiv.removeEventListener('pointercancel', stop);
+    };
+
+    playerDiv.addEventListener('pointermove', moveTo);
+    playerDiv.addEventListener('pointerup', stop);
+    playerDiv.addEventListener('pointercancel', stop);
+  };
+}
+
 // ========== 开关控制函数 ==========
 
 /**
  * 切换原始站位/实际接发球站位
  */
 function togglePosition() {
-  // 切换状态
+  // 编辑模式下点“恢复原位”：先保存当前拖动状态
+  if (gameState.isEditingPositions) {
+    savePositionDraft();
+    exitPositionEdit();
+  }
+
   gameState.isOriginalPosition = !gameState.isOriginalPosition;
 
-  console.log('切换站位模式：', gameState.isOriginalPosition ? '原始站位' : '实际接发球站位');
-
-  // 更新按钮文字
-  const toggleBtn = document.getElementById('toggle-position-btn');
-  if (toggleBtn) {
-    toggleBtn.textContent = gameState.isOriginalPosition ? '变化 ➜' : '恢复原位 ↺';
-  }
-
-  // 切换场地容器的 CSS 类（控制三米线和背景数字变化）
-  const courtContainer = document.querySelector('.court-container');
-  if (courtContainer) {
-    if (gameState.isOriginalPosition) {
-      courtContainer.classList.remove('variation');
-    } else {
-      courtContainer.classList.add('variation');
-    }
-  }
-
-  // 重新渲染球员和UI
-  renderPlayers();
   updateUI();
+  renderPlayers();
 }
 
 /**

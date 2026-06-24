@@ -169,7 +169,10 @@ body {
   border-radius: 2.75rem;
   font-size: 2rem;
   margin: 1.25rem auto;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
   box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
   cursor: pointer;
   user-select: none;
@@ -1040,7 +1043,8 @@ body {
   line-height: 5rem;
   border-radius: 2.5rem;
   font-size: 1.75rem;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease, opacity 0.2s ease;
+  white-space: nowrap;
 }
 
 .btn-control:active:not(.btn-disabled) {
@@ -1313,4 +1317,129 @@ input:checked+.slider:before {
 
 .seo-content strong {
   color: #C44569;
+}
+
+/* ========== 左侧抽屉 ========== */
+
+.side-drawer {
+  position: fixed;
+  top: 5rem;
+  left: 0;
+  z-index: 1100;
+  display: flex;
+  align-items: stretch;
+  transform: translateX(-16rem);
+  transition: transform 0.25s ease;
+}
+
+.side-drawer.open {
+  transform: translateX(0);
+}
+
+.drawer-panel {
+  width: 16rem;
+  min-height: 18rem;
+  padding: 1rem;
+  background: rgba(255, 255, 255, 0.96);
+  border-right: 1px solid #f0f0f0;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.75rem;
+  color: #FF6B9D;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.drawer-close,
+.drawer-toggle {
+  border: none;
+  cursor: pointer;
+  color: #FF6B9D;
+  background: rgba(255, 255, 255, 0.9);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+}
+
+.drawer-close {
+  padding: 0.25rem 0.5rem;
+}
+
+.drawer-toggle {
+  width: 2.75rem;
+  padding: 0.75rem 0.5rem;
+  border-radius: 0 1rem 1rem 0;
+  box-shadow: 0 0.25rem 0.75rem rgba(0, 0, 0, 0.1);
+  writing-mode: vertical-rl;
+  letter-spacing: 0.1rem;
+}
+
+.drawer-note {
+  width: 100%;
+  min-height: 13rem;
+  resize: vertical;
+  border: 1px solid #FFE0E9;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  outline: none;
+  color: #333;
+  background: #FFF9FB;
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  line-height: 1.6;
+}
+
+.drawer-note:focus {
+  border-color: #FF6B9D;
+}
+
+/* ========== 站位编辑模式 ========== */
+
+.position-action-row .btn-control {
+  margin: 0;
+  max-width: none;
+}
+
+.position-action-row .position-toggle-btn {
+  flex: 1 1 100%;
+}
+
+.position-action-row .position-edit-btn {
+  display: none;
+  flex: 1 1 0;
+}
+
+.position-action-row.variation-mode .position-toggle-btn {
+  flex: 2 1 0;
+}
+
+.position-action-row.variation-mode .position-edit-btn {
+  display: block;
+}
+
+.position-action-row.editing-mode .position-edit-btn {
+  background: linear-gradient(135deg, #FF6B9D 0%, #C44569 100%);
+  color: #FFFFFF;
+  border-color: transparent;
+}
+
+.court-container.position-editing {
+  outline: 3px dashed rgba(255, 107, 157, 0.45);
+  outline-offset: 0.4rem;
+}
+
+.court-container.position-editing .player {
+  cursor: grab;
+}
+
+.court-container.position-editing .player.dragging {
+  cursor: grabbing;
+  z-index: 50;
+  transition: none !important;
 }
