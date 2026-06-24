@@ -22,13 +22,18 @@ let gameState = {
   // 编辑模式新增变量
   isEditingPositions: false,
   customPositions: {},
-  draftPositions: {}
+  draftPositions: {},
+  // customBaseCoords: {},
+  formationTitle: '默认站位'
 };
 
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
 const CUSTOM_NAMES_KEY = 'air_volleyball_5_custom_names';
 const CUSTOM_POSITIONS_KEY = 'air_volleyball_5_custom_positions';
 const DRAWER_NOTE_KEY = 'air_volleyball_5_drawer_note';
+// const CUSTOM_BASE_COORDS_KEY = 'air_volleyball_5_base_coords';
+const FORMATION_TITLE_KEY = 'air_volleyball_5_formation_title';
+// const PRESET_SCHEMA_VERSION = 1;
 
 
 // ========== 新增可编辑逻辑 ==========
@@ -75,6 +80,29 @@ function saveDrawerNote() {
   localStorage.setItem(DRAWER_NOTE_KEY, note.value);
 }
 
+// 站位名的保存和读取
+function loadFormationTitle() {
+  const savedTitle = localStorage.getItem(FORMATION_TITLE_KEY);
+
+  if (savedTitle) {
+    gameState.formationTitle = savedTitle;
+  }
+
+  const input = document.getElementById('formation-title-input');
+  if (input) {
+    input.value = gameState.formationTitle;
+  }
+}
+
+function saveFormationTitle() {
+  const input = document.getElementById('formation-title-input');
+  if (!input) return;
+
+  const title = input.value.trim() || '未命名站位';
+  gameState.formationTitle = title;
+  localStorage.setItem(FORMATION_TITLE_KEY, title);
+}
+
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
 function loadCustomNames() {
   try {
@@ -91,10 +119,12 @@ function saveCustomNames() {
 
 // ========== 页面初始化 ==========
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('排球二传插上教学 - Web版已加载');
+  console.log('排球站位教学 - Web版已加载');
   loadCustomNames();
   loadCustomPositions();
   loadDrawerNote();
+  loadFormationTitle();
+
   // 读取 hash，支持切换语言后停留在同一页面
   let initial = (location.hash || '').replace('#', '');
   if (!['index', 'tutorial', 'setter'].includes(initial)) {
@@ -1044,3 +1074,165 @@ window.onclick = function (event) {
     closeStartPosModal();
   }
 }
+
+
+// // 导入导出逻辑
+
+// function getCurrentPresetTitle() {
+//     const input = document.getElementById('formation-title-input');
+//     const title = input?.value?.trim() || gameState.formationTitle || '未命名站位';
+
+//     gameState.formationTitle = title;
+//     localStorage.setItem(FORMATION_TITLE_KEY, title);
+
+//     return title;
+// }
+
+// function buildPositionPreset() {
+//     return {
+//         schema: 'air-volleyball-position-preset',
+//         version: PRESET_SCHEMA_VERSION,
+//         exportedAt: new Date().toISOString(),
+
+//         title: getCurrentPresetTitle(),
+
+//         // 只用于校验，不用于覆盖基础坐标
+//         totalRotations: TOTAL_ROTATIONS,
+//         setterPositions: SETTER_POSITIONS,
+
+//         // 五个球员名
+//         customNames: gameState.customNames || {},
+
+//         // 只保存接发球变化站位
+//         variationPositions: gameState.customPositions || {},
+
+//         // 可选：备注也保存
+//         note: localStorage.getItem(DRAWER_NOTE_KEY) || ''
+//     };
+// }
+
+// function exportPositionPreset() {
+//     if (gameState.isEditingPositions) {
+//         alert('请先保存正在编辑的站位，再导出');
+//         return;
+//     }
+
+//     const preset = buildPositionPreset();
+//     const json = JSON.stringify(preset, null, 2);
+
+//     const blob = new Blob([json], {
+//         type: 'application/json;charset=utf-8'
+//     });
+
+//     const url = URL.createObjectURL(blob);
+//     const link = document.createElement('a');
+
+//     const safeTitle = preset.title.replace(/[\\/:*?"<>|]/g, '_');
+
+//     link.href = url;
+//     link.download = `${safeTitle}-气排球站位.json`;
+//     link.click();
+
+//     URL.revokeObjectURL(url);
+// }
+
+// function triggerImportPreset() {
+//     const input = document.getElementById('preset-file-input');
+//     if (!input) return;
+
+//     input.value = '';
+//     input.click();
+// }
+
+// function importPositionPreset(event) {
+//     const file = event.target.files?.[0];
+//     if (!file) return;
+
+//     const reader = new FileReader();
+
+//     reader.onload = function () {
+//         try {
+//             const preset = JSON.parse(reader.result);
+//             confirmAndApplyPositionPreset(preset);
+//         } catch (error) {
+//             alert('导入失败：文件不是有效的 JSON 格式');
+//         }
+//     };
+
+//     reader.readAsText(file, 'utf-8');
+// }
+
+// function validatePositionPreset(preset) {
+//     if (!preset || typeof preset !== 'object') {
+//         return false;
+//     }
+
+//     if (preset.schema !== 'air-volleyball-position-preset') {
+//         return false;
+//     }
+
+//     if (preset.totalRotations && preset.totalRotations !== TOTAL_ROTATIONS) {
+//         return false;
+//     }
+
+//     if (!preset.customNames || typeof preset.customNames !== 'object') {
+//         return false;
+//     }
+
+//     if (!preset.variationPositions || typeof preset.variationPositions !== 'object') {
+//         return false;
+//     }
+
+//     return true;
+// }
+
+// function confirmAndApplyPositionPreset(preset) {
+//     if (!validatePositionPreset(preset)) {
+//         alert('导入失败：这不是有效的五人气排球站位预设文件');
+//         return;
+//     }
+
+//     const title = preset.title || '未命名站位';
+
+//     const ok = window.confirm(
+//         `是否应用「${title}」的站位设置？`
+//     );
+
+//     if (!ok) return;
+
+//     applyPositionPreset(preset);
+// }
+
+// function applyPositionPreset(preset) {
+//     const title = preset.title || '未命名站位';
+
+//     gameState.formationTitle = title;
+//     gameState.customNames = preset.customNames || {};
+//     gameState.customPositions = preset.variationPositions || {};
+//     gameState.draftPositions = {};
+//     gameState.isEditingPositions = false;
+
+//     localStorage.setItem(FORMATION_TITLE_KEY, title);
+//     localStorage.setItem(CUSTOM_NAMES_KEY, JSON.stringify(gameState.customNames));
+//     saveCustomPositions();
+
+//     if (typeof preset.note === 'string') {
+//         localStorage.setItem(DRAWER_NOTE_KEY, preset.note);
+
+//         const note = document.getElementById('drawer-note');
+//         if (note) {
+//             note.value = preset.note;
+//         }
+//     }
+
+//     const titleInput = document.getElementById('formation-title-input');
+//     if (titleInput) {
+//         titleInput.value = title;
+//     }
+
+//     initRotation();
+//     renderPlayers();
+//     updateUI();
+
+//     alert(`已应用「${title}」的站位设置`);
+// }

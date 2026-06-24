@@ -228,7 +228,7 @@ function getAllPlayersPositions(rotation) {
     let isHighlight = false;
 
     // 如果角色是"主攻" (basePos 2 或 5) 且 在前排 (2,3,4号位) -> 高亮
-    if ((basePos === 2 || basePos === 5) && [2, 3, 4].includes(pos)) {
+    if ((basePos === 2 || basePos === 4) && [2, 3, 4].includes(pos)) {
       isHighlight = true;
     }
 
@@ -240,7 +240,7 @@ function getAllPlayersPositions(rotation) {
 
     // 名字键：后排副攻(3/6号身份)被自由人替换，统一用 libero 身份共享名字
     let nameKey = `player-base-${basePos}`;
-    if ((basePos === 3) && [1, 5, 6].includes(pos)) {
+    if ((basePos === 3) && [1, 5].includes(pos)) {
       nameKey = 'libero';
     }
 

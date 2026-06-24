@@ -19,6 +19,14 @@
 <body>
   <!-- 语言切换按钮（固定右上角，所有页面可见） -->
   <div class="lang-switch" onclick="switchLang()">EN</div>
+  <!-- 导入导出按钮 -->
+  <div class="preset-actions">
+    <button class="preset-icon-btn" title="导出站位" onclick="exportPositionPreset()">⇩</button>
+    <button class="preset-icon-btn" title="导入站位" onclick="triggerImportPreset()">⇧</button>
+
+    <input id="preset-file-input" type="file" accept=".json,application/json" style="display: none;"
+      onchange="importPositionPreset(event)">
+  </div>
 
   <!-- 左侧抽屉：默认折叠，可编辑自定义笔记 -->
   <aside id="side-drawer" class="side-drawer">
@@ -28,13 +36,8 @@
         <button class="drawer-close" onclick="toggleDrawer(false)">收起</button>
       </div>
 
-      <textarea
-        id="drawer-note"
-        class="drawer-note"
-        maxlength="500"
-        placeholder="这里可以记录队员说明、站位备注或训练重点"
-        oninput="saveDrawerNote()"
-      ></textarea>
+      <textarea id="drawer-note" class="drawer-note" maxlength="500" placeholder="这里可以记录队员说明、站位备注或训练重点"
+        oninput="saveDrawerNote()"></textarea>
     </div>
 
     <button class="drawer-toggle" onclick="toggleDrawer()">备注</button>
@@ -75,148 +78,6 @@
     </div>
   </div>
 
-  <!-- 规则说明页 -->
-  <div id="tutorial-page" class="page">
-    <div class="container tutorial-container">
-      <!-- 返回按钮 -->
-      <div class="nav-back" onclick="goBack()">
-        <span>← 返回</span>
-      </div>
-
-      <!-- 标题 -->
-      <div class="page-title">
-        <h1 class="title">二传插上规则说明</h1>
-      </div>
-
-      <!-- 规则卡片1：基础概念 -->
-      <div class="card fade-in">
-        <div class="card-title">
-          <span class="title-icon">📍</span>
-          <span class="title-text">什么是二传插上？</span>
-        </div>
-        <div class="card-content">
-          <p class="content-text">
-            二传插上是排球比赛中的重要技术。当二传手轮转到后排位置时，为了保持最佳的传球位置（前排2-3号位之间），需要在发球后快速移动到前排，这个动作就叫做"插上"。
-          </p>
-        </div>
-      </div>
-
-      <!-- 规则卡片2：位置说明 -->
-      <div class="card fade-in">
-        <div class="card-title">
-          <span class="title-icon">🎯</span>
-          <span class="title-text">场上6个位置</span>
-        </div>
-        <div class="card-content">
-          <div class="position-diagram">
-            <div class="position-row front-row">
-              <div class="position-item">
-                <span class="position-number">④</span>
-                <span class="position-name">左前</span>
-              </div>
-              <div class="position-item">
-                <span class="position-number">③</span>
-                <span class="position-name">中前</span>
-              </div>
-              <div class="position-item">
-                <span class="position-number">②</span>
-                <span class="position-name">右前</span>
-              </div>
-            </div>
-            <div class="net-line">
-              <span>══════ 球网 ══════</span>
-            </div>
-            <div class="position-row back-row">
-              <div class="position-item">
-                <span class="position-number">⑤</span>
-                <span class="position-name">左后</span>
-              </div>
-              <div class="position-item">
-                <span class="position-number">⑥</span>
-                <span class="position-name">中后</span>
-              </div>
-              <div class="position-item">
-                <span class="position-number">①</span>
-                <span class="position-name">右后</span>
-              </div>
-            </div>
-          </div>
-          <p class="content-text" style="margin-top: 20px;">
-            前排：2、3、4号位（可以在网前进攻）<br>
-            后排：1、5、6号位（主要负责防守）
-          </p>
-        </div>
-      </div>
-
-      <!-- 规则卡片3：前排vs后排 -->
-      <div class="card fade-in">
-        <div class="card-title">
-          <span class="title-icon">🔄</span>
-          <span class="title-text">前排 vs 后排</span>
-        </div>
-        <div class="card-content">
-          <div class="compare-section">
-            <div class="compare-item">
-              <p class="compare-title">✅ 二传在前排</p>
-              <p class="compare-text">位置理想，可以直接传球，不需要插上</p>
-            </div>
-            <div class="compare-item">
-              <p class="compare-title">⚠️ 二传在后排</p>
-              <p class="compare-text">距离网太远，必须在发球后插上到前排进行传球</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 规则卡片4：为什么需要插上 -->
-      <div class="card fade-in">
-        <div class="card-title">
-          <span class="title-icon">💡</span>
-          <span class="title-text">为什么需要插上？</span>
-        </div>
-        <div class="card-content">
-          <div class="reason-list">
-            <div class="reason-item">
-              <span class="reason-number">1</span>
-              <span class="reason-text">保持最佳传球位置，方便给主攻和副攻传球</span>
-            </div>
-            <div class="reason-item">
-              <span class="reason-number">2</span>
-              <span class="reason-text">快速响应，提高进攻效率</span>
-            </div>
-            <div class="reason-item">
-              <span class="reason-number">3</span>
-              <span class="reason-text">保持战术体系的稳定性</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- 规则卡片5：插上时机 -->
-      <div class="card fade-in">
-        <div class="card-title">
-          <span class="title-icon">⏰</span>
-          <span class="title-text">什么时候插上？</span>
-        </div>
-        <div class="card-content">
-          <p class="content-text highlight-text">
-            ⚡ 发球后立即插上！
-          </p>
-          <p class="content-text">
-            注意：发球前不能越位（后排队员不能站在前排队员前面），发球后才能自由移动。
-          </p>
-        </div>
-      </div>
-
-      <!-- 开始学习按钮 -->
-      <div class="bottom-actions">
-        <div class="btn btn-primary" onclick="goToSetter()">
-          <span>开始学习插上技术</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <!-- 二传插上主页面 -->
   <div id="setter-page" class="page">
     <div class="container setter-container">
@@ -225,13 +86,20 @@
         <span>← 返回</span>
       </div>
 
+      <!-- 站位模板标题 -->
+      <div class="formation-title-row">
+        <span class="formation-title-label">站位名:</span>
+        <input id="formation-title-input" class="formation-title-input" maxlength="30" value="默认站位"
+          oninput="saveFormationTitle()">
+      </div>
+
       <!-- 顶部信息栏 -->
       <div class="top-info">
         <div class="rotation-info">
           <span class="rotation-label">当前轮次：</span>
           <span class="rotation-value" id="rotation-display">第 1 轮</span>
           <span class="serve-icon" id="serve-indicator" style="display: none;">反轮</span>
-          <span class="actual-pos-label" id="actual-pos-label" style="display: none;">实际接发球站位</span>
+          <span class="actual-pos-label" id="actual-pos-label" style="display: none;">接发球站位</span>
         </div>
       </div>
 
@@ -287,16 +155,18 @@
         </div>
         <!-- 变化/恢复原位 + 编辑/保存：基础模式只显示变化；变化模式显示 2:1 两按钮 -->
         <div class="button-row position-action-row" id="position-action-row" style="margin-top: 1.25rem;">
-          <div class="btn btn-control btn-secondary position-toggle-btn" id="toggle-position-btn" onclick="togglePosition()">
+          <div class="btn btn-control btn-secondary position-toggle-btn" id="toggle-position-btn"
+            onclick="togglePosition()">
             变化 →
           </div>
-          <div class="btn btn-control btn-secondary position-edit-btn" id="edit-position-btn" onclick="togglePositionEdit()">
+          <div class="btn btn-control btn-secondary position-edit-btn" id="edit-position-btn"
+            onclick="togglePositionEdit()">
             编辑
           </div>
         </div>
       </div>
 
-      
+
 
       <!-- 开关设置 (已移除) -->
       <!--
@@ -380,6 +250,8 @@
   <!-- JavaScript -->
   <script src="js/rotation.js"></script>
   <script src="js/app.js"></script>
+  <script src="js/preset-core.js"></script>
+  <script src="js/preset-web.js"></script>
 </body>
 
 </html>
