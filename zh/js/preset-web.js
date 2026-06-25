@@ -5,6 +5,16 @@
  */
 (function (global) {
     const PresetCore = global.AirVolleyPresetCore;
+    const DEFAULT_PRESET_URL = '../json/default.json';
+
+    // 增加“是否已有本地配置”的判断
+    function hasUserPresetData() {
+        return Boolean(
+            localStorage.getItem(CUSTOM_NAMES_KEY) ||
+            localStorage.getItem(CUSTOM_POSITIONS_KEY) ||
+            localStorage.getItem(FORMATION_TITLE_KEY)
+        );
+    }
 
     function getCurrentPresetTitle() {
         const input = document.getElementById('formation-title-input');
@@ -115,7 +125,7 @@
         applyPositionPreset(preset);
     }
 
-    function applyPositionPreset(preset) {
+    function applyPositionPreset(preset, options = {}) {
         gameState.formationTitle = preset.title || '未命名站位';
         gameState.customNames = preset.customNames || {};
         gameState.customPositions = preset.variationPositions || {};
@@ -144,11 +154,52 @@
         renderPlayers();
         updateUI();
 
-        alert(`已应用「${gameState.formationTitle}」的站位设置`);
+        if (!options.silent) {
+            alert(`已应用「${gameState.formationTitle}」的站位设置`);
+        }
     }
+
+    async function loadDefaultPresetIfNeeded() {
+        if (hasUserPresetData()) {
+            return;
+        }
+
+        try {
+            const response = await fetch(DEFAULT_PRESET_URL, {
+                cache: 'no-cache'
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            const rawPreset = await response.json();
+
+            const result = PresetCore.validatePreset(rawPreset, {
+                totalRotations: TOTAL_ROTATIONS
+            });
+
+            if (!result.ok) {
+                console.warn('默认站位配置无效：', result.message);
+                return;
+            }
+
+            applyPositionPreset(result.preset, {
+                silent: true
+            });
+
+            console.log('已加载默认站位配置');
+        } catch (error) {
+            console.warn('默认站位配置加载失败：', error);
+        }
+    }
+
 
     // 暴露给 HTML onclick 使用
     global.exportPositionPreset = exportPositionPreset;
     global.triggerImportPreset = triggerImportPreset;
     global.importPositionPreset = importPositionPreset;
+    document.addEventListener('DOMContentLoaded', function () {
+        loadDefaultPresetIfNeeded();
+    });
 })(window);

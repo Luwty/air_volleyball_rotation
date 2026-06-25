@@ -63,11 +63,6 @@
         <div class="btn btn-primary" onclick="goToSetter()">
           <span>开始学习</span>
         </div>
-
-        <!-- 规则说明按钮 -->
-        <div class="btn btn-secondary" onclick="goToTutorial()" style="display: none;">
-          <span>规则说明</span>
-        </div>
       </div>
 
       <!-- 底部说明 -->
@@ -98,8 +93,6 @@
         <div class="rotation-info">
           <span class="rotation-label">当前轮次：</span>
           <span class="rotation-value" id="rotation-display">第 1 轮</span>
-          <!-- <span class="serve-icon" id="serve-indicator" style="display: none;">反轮</span> -->
-          <!-- <span class="actual-pos-label" id="actual-pos-label" style="display: none;">接发球站位</span> -->
           <button class="actual-pos-label actual-pos-switch" id="actual-pos-label" type="button" style="display: none;"
             onclick="togglePositionScene()">
             发球站位
@@ -117,9 +110,6 @@
           <div id="court-label-4" class="position-label front-row" style="left: 16.7%; top: 26%;">4</div> <!-- 左前角 -->
           <div id="court-label-5" class="position-label" style="left: 33.3%; top: 74%;">5</div> <!-- 左后角 -->
 
-          <!-- Canvas用于绘制插上路线箭头 -->
-          <!-- <canvas id="penetration-canvas" class="penetration-canvas" width="600" height="800"></canvas> -->
-
           <!-- 球网 -->
           <div class="net"></div>
 
@@ -130,14 +120,6 @@
             onclick="resetCurrentRotationPositionsToBase()">
             重置
           </button>
-
-          <!-- 二传插上后的虚影 -->
-          <!-- <div id="setter-shadow" class="player player-shadow" style="display: none;">
-            <div class="player-content">
-              <span class="player-number" id="shadow-number"></span>
-              <span class="player-role">起始</span>
-            </div>
-          </div> -->
         </div>
       </div>
 
@@ -173,29 +155,6 @@
             编辑
           </div>
         </div>
-      </div>
-
-
-
-      <!-- 开关设置 (已移除) -->
-      <!--
-      <div class="settings-panel card">
-        <div class="settings-title">
-          <span>显示设置</span>
-        </div>
-        <div class="switch-item">
-          <span class="switch-label">显示插上路线</span>
-          <label class="switch">
-            <input type="checkbox" id="route-switch" checked onchange="onRouteSwitch()">
-            <span class="slider"></span>
-          </label>
-        </div>
-      </div>
-      -->
-
-      <!-- 规则说明按钮 -->
-      <div class="help-button" onclick="goToTutorial()" style="display: none;">
-        <span>❓ 查看规则说明</span>
       </div>
     </div>
   </div>
@@ -243,10 +202,10 @@
 
   <!-- JavaScript -->
   <script src="js/rotation.js"></script>
+  <script src="js/preset-core.js"></script>
   <script src="js/position-editor.js"></script>
   <script src="js/app.js"></script>
   <script src="js/export-image.js"></script>
-  <script src="js/preset-core.js"></script>
   <script src="js/preset-web.js"></script>
 </body>
 

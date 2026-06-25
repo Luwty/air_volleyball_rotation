@@ -11,21 +11,23 @@ let gameState = {
   rotationOffset: 0,               // 轮次偏移 (用户设置二传起始位置时改变)
   setterPosition: 2,               // 二传位置 (1-6)
   isSetterFrontRow: true,          // 二传是否在前排
-  // needsPenetration: false,         // 是否需要插上
+
   statusText: '',                  // 状态提示文字
   players: [],                     // 所有球员数据
-  // originalSetterCoords: {},        // 二传起始坐标
-  // showPenetrationRoute: true,      // 是否显示插上路线
+
   isAnimating: false,              // 是否正在播放动画
   isOriginalPosition: true,        // 是否显示原始站位
+  positionScene: 'serve', // 当前站位场景
+
   customNames: {},                  // 用户自定义球员名字 (key: player-base-X)
   // 编辑模式新增变量
   isEditingPositions: false,
-  customPositions: {},
+  customPositions: {
+    serve: {},
+    receive: {}
+  },
   draftPositions: {},
-  // customBaseCoords: {},
   formationTitle: '默认站位',
-  positionScene: 'serve', // 当前站位场景
 };
 
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
@@ -167,14 +169,6 @@ document.addEventListener('DOMContentLoaded', function () {
   showPage(initial);
 });
 
-// ========== 语言切换 ==========
-/**
- * 切换到英文版（根目录），并保留当前页面
- */
-function switchLang() {
-  location.href = '../index.html#' + currentPage;
-}
-
 // ========== 页面切换函数 ==========
 
 /**
@@ -221,17 +215,10 @@ function updateTopActionsVisibility() {
 }
 
 /**
- * 跳转到二传插上主页面
+ * 跳转到站位主页面
  */
 function goToSetter() {
   showPage('setter');
-}
-
-/**
- * 跳转到规则说明页
- */
-function goToTutorial() {
-  showPage('tutorial');
 }
 
 /**
@@ -671,11 +658,6 @@ function updateCourtLabels() {
     if (label) {
       // 默认使用 POSITION_COORDS (原始位置)
       let coords = POSITION_COORDS[i];
-
-      // 如果是“变化”模式，且配置了 COURT_ACTUAL_POSITIONS，则使用新坐标
-      if (!gameState.isOriginalPosition && typeof COURT_ACTUAL_POSITIONS !== 'undefined' && COURT_ACTUAL_POSITIONS[i]) {
-        coords = COURT_ACTUAL_POSITIONS[i];
-      }
 
       label.style.left = coords.x + '%';
       label.style.top = coords.y + '%';

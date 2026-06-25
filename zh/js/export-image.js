@@ -136,11 +136,47 @@
         drawCourtCaption(ctx, '接发球站位', layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth);
         y += layout.captionHeight;
 
-        drawCourt(ctx, layout.margin, y, layout.courtWidth, layout.courtHeight, players, 'serve', effectiveRotation);
-        drawCourt(ctx, layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth, layout.courtHeight, players, 'receive', effectiveRotation);
-        y += layout.courtHeight;
+        drawCourt(
+          ctx,
+          layout.margin,
+          y,
+          layout.courtWidth,
+          layout.courtHeight,
+          players,
+          'serve',
+          effectiveRotation,
+          {
+            attackLineRatio: 0.333,
+            showPositionLabels: false
+          }
+        );
+
+        drawCourt(
+          ctx,
+          layout.margin + layout.courtWidth + layout.gap,
+          y,
+          layout.courtWidth,
+          layout.courtHeight,
+          players,
+          'receive',
+          effectiveRotation,
+          {
+            attackLineRatio: 0.333,
+            showPositionLabels: false
+          }
+        );
       } else {
-        drawCourt(ctx, layout.margin, y, layout.courtWidth, layout.courtHeight, players, mode, effectiveRotation);
+        drawCourt(
+          ctx,
+          layout.margin,
+          y,
+          layout.courtWidth,
+          layout.courtHeight,
+          players,
+          mode,
+          effectiveRotation,
+          getCourtRenderOptions(mode)
+        );
         y += layout.courtHeight;
       }
 
@@ -151,6 +187,21 @@
 
     downloadCanvas(canvas, `${title}-${EXPORT_MODES[mode]}.png`);
   };
+
+  function getCourtRenderOptions(mode) {
+    if (mode === 'base') {
+      return {
+        attackLineRatio: 0.5,
+        showPositionLabels: true
+      };
+    }
+
+    return {
+      attackLineRatio: 0.333,
+      showPositionLabels: false
+    };
+  }
+
 
   function getExportTitle() {
     const input = document.getElementById('formation-title-input');
@@ -276,14 +327,22 @@
     ctx.stroke();
   }
 
-  function drawCourt(ctx, x, y, width, height, players, mode, effectiveRotation) {
+  function drawCourt(ctx, x, y, width, height, players, mode, effectiveRotation, options = {}) {
     ctx.save();
+
+    const courtOptions = {
+      attackLineRatio: options.attackLineRatio ?? 0.5,
+      showPositionLabels: options.showPositionLabels === true
+    };
 
     ctx.fillStyle = '#E8F5E9';
     ctx.fillRect(x, y, width, height);
 
-    drawCourtLines(ctx, x, y, width, height);
-    drawPositionLabels(ctx, x, y, width, height);
+    drawCourtLines(ctx, x, y, width, height, courtOptions);
+
+    if (courtOptions.showPositionLabels) {
+      drawPositionLabels(ctx, x, y, width, height);
+    }
 
     players.forEach(player => {
       const coords = getExportCoords(player, mode, effectiveRotation);
@@ -293,7 +352,7 @@
     ctx.restore();
   }
 
-  function drawCourtLines(ctx, x, y, width, height) {
+  function drawCourtLines(ctx, x, y, width, height, options = {}) {
     const left = x + width * 0.03;
     const right = x + width * 0.97;
     const top = y + height * 0.02;
@@ -314,9 +373,13 @@
 
     ctx.strokeStyle = '#666666';
     ctx.lineWidth = 2;
+
+    const attackLineRatio = options.attackLineRatio ?? 0.5;
+    const attackLineY = y + height * attackLineRatio;
+
     ctx.beginPath();
-    ctx.moveTo(x + width * 0.035, y + height * 0.333);
-    ctx.lineTo(x + width * 0.965, y + height * 0.333);
+    ctx.moveTo(x + width * 0.035, attackLineY);
+    ctx.lineTo(x + width * 0.965, attackLineY);
     ctx.stroke();
   }
 
