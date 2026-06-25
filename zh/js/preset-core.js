@@ -25,6 +25,29 @@
         return value !== null && typeof value === 'object' && !Array.isArray(value);
     }
 
+    function normalizeVariationPositions(value) {
+        if (!isPlainObject(value)) {
+            return {
+                serve: {},
+                receive: {}
+            };
+        }
+
+        // 新结构：{ serve: {}, receive: {} }
+        if (isPlainObject(value.serve) || isPlainObject(value.receive)) {
+            return {
+                serve: isPlainObject(value.serve) ? clone(value.serve) : {},
+                receive: isPlainObject(value.receive) ? clone(value.receive) : {}
+            };
+        }
+
+        // 旧结构：直接按轮次存储，默认作为发球站位
+        return {
+            serve: clone(value),
+            receive: {}
+        };
+    }
+
     function normalizePreset(raw) {
         const preset = isPlainObject(raw) ? raw : {};
 
@@ -46,11 +69,9 @@
 
             // 新字段：variationPositions
             // 兼容旧字段：variationCoords
-            variationPositions: isPlainObject(preset.variationPositions)
-                ? clone(preset.variationPositions)
-                : isPlainObject(preset.variationCoords)
-                    ? clone(preset.variationCoords)
-                    : {},
+            variationPositions: normalizeVariationPositions(
+                preset.variationPositions || preset.variationCoords
+            ),
 
             note: typeof preset.note === 'string' ? preset.note : ''
         };
@@ -74,7 +95,7 @@
 
             // 只保存球员名和接发球变化站位
             customNames: clone(source.customNames),
-            variationPositions: clone(source.variationPositions),
+            variationPositions: normalizeVariationPositions(source.variationPositions),
 
             // 可选备注
             note: String(source.note || '')

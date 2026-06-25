@@ -24,7 +24,8 @@ let gameState = {
   customPositions: {},
   draftPositions: {},
   // customBaseCoords: {},
-  formationTitle: '默认站位'
+  formationTitle: '默认站位',
+  positionScene: 'serve', // 当前站位场景
 };
 
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
@@ -38,12 +39,45 @@ const FORMATION_TITLE_KEY = 'air_volleyball_5_formation_title';
 
 // ========== 新增可编辑逻辑 ==========
 
+function isScenePositionMap(value) {
+  return value &&
+    typeof value === 'object' &&
+    (value.serve || value.receive);
+}
+
+function normalizeScenePositions(raw) {
+  if (!raw || typeof raw !== 'object') {
+    return {
+      serve: {},
+      receive: {}
+    };
+  }
+
+  // 新结构：{ serve: {}, receive: {} }
+  if (isScenePositionMap(raw)) {
+    return {
+      serve: raw.serve || {},
+      receive: raw.receive || {}
+    };
+  }
+
+  // 兼容旧结构：{ "1": { "1": {x,y} } }
+  // 旧变化站位默认迁移为“发球站位”
+  return {
+    serve: raw,
+    receive: {}
+  };
+}
+
 function loadCustomPositions() {
   try {
-    gameState.customPositions =
-      JSON.parse(localStorage.getItem(CUSTOM_POSITIONS_KEY)) || {};
+    const raw = JSON.parse(localStorage.getItem(CUSTOM_POSITIONS_KEY)) || {};
+    gameState.customPositions = normalizeScenePositions(raw);
   } catch {
-    gameState.customPositions = {};
+    gameState.customPositions = {
+      serve: {},
+      receive: {}
+    };
   }
 }
 
@@ -416,7 +450,9 @@ function updateUI() {
   const actualPosLabel = document.getElementById('actual-pos-label');
 
   if (actualPosLabel) {
-    actualPosLabel.style.display = gameState.isOriginalPosition ? 'none' : 'inline';
+    actualPosLabel.style.display = gameState.isOriginalPosition ? 'none' : 'inline-flex';
+    actualPosLabel.textContent = getPositionSceneLabel();
+    actualPosLabel.title = '点击切换发球 / 接发球站位';
   }
 
   // 新增更新编辑按钮
@@ -528,38 +564,37 @@ function prevRotation() {
  * 播放轮转动画（实际不再播放动画，直接跳转）
  */
 function playRotationAnimation(nextRot) {
-  // 重置为原始站位模式
-  gameState.isOriginalPosition = true;
+  const wasEditing = gameState.isEditingPositions;
 
+  // 编辑模式下切换轮次：先保存当前编辑，然后回到基础模式
+  if (wasEditing) {
+    savePositionDraft();
+    exitPositionEdit();
+
+    gameState.isOriginalPosition = true;
+    gameState.positionScene = 'serve';
+  }
+
+  // 非编辑模式下切换轮次：
+  // 保持当前模式。
+  // 如果原来在基础站位，就继续基础站位；
+  // 如果原来在变化模式，就继续变化模式；
+  // 如果原来是发球站位，就保持发球；
+  // 如果原来是接发球站位，就保持接发球。
   gameState.isEditingPositions = false;
   gameState.draftPositions = {};
-
-  // // 更新按钮文字
-  // const toggleBtn = document.getElementById('toggle-position-btn');
-  // if (toggleBtn) {
-  //   toggleBtn.textContent = '变化 ➜';
-  // }
-
-  // // 确保变回原始样式
-  // const courtContainer = document.querySelector('.court-container');
-  // if (courtContainer) {
-  //   courtContainer.classList.remove('variation');
-  // }
 
   // 更新轮次
   gameState.currentRotation = nextRot;
 
-  // 计算新位置 (使用偏移后的逻辑轮次)
+  // 计算新位置
   const effectiveRotation = getEffectiveRotation(nextRot);
   const newSetterPos = getSetterPosition(effectiveRotation);
   const newPlayers = getAllPlayersPositions(effectiveRotation);
 
   gameState.players = newPlayers;
 
-  // 立即更新球员位置
   renderPlayers();
-
-  // 立即执行后续逻辑，不延迟
   afterRotation(effectiveRotation, newSetterPos);
 }
 
@@ -588,17 +623,40 @@ function afterRotation(rotation, setterPos) {
 
 // ========== 开关控制函数 ==========
 
+function getPositionSceneLabel(scene = gameState.positionScene) {
+  return scene === 'receive' ? '接发球站位' : '发球站位';
+}
+
+function togglePositionScene() {
+  if (gameState.isOriginalPosition) return;
+
+  if (gameState.isEditingPositions) {
+    savePositionDraft();
+    exitPositionEdit();
+  }
+
+  gameState.positionScene =
+    gameState.positionScene === 'serve' ? 'receive' : 'serve';
+
+  updateUI();
+  renderPlayers();
+}
+
 /**
  * 切换原始站位/实际接发球站位
  */
 function togglePosition() {
-  // 编辑模式下点“恢复原位”：先保存当前拖动状态
   if (gameState.isEditingPositions) {
     savePositionDraft();
     exitPositionEdit();
   }
 
   gameState.isOriginalPosition = !gameState.isOriginalPosition;
+
+  // 点击“变化”时默认进入发球站位
+  if (!gameState.isOriginalPosition) {
+    gameState.positionScene = 'serve';
+  }
 
   updateUI();
   renderPlayers();

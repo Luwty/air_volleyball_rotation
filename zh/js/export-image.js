@@ -1,8 +1,9 @@
 (function () {
   const EXPORT_MODES = {
     base: '基础站位',
-    variation: '变化站位',
-    compare: '基础 + 变化'
+    serve: '发球站位',
+    receive: '接发球站位',
+    serveReceive: '发 / 接发球站位'
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -38,13 +39,16 @@
         </div>
         <div class="modal-body tactics-export-body">
           <button class="export-mode-btn" onclick="exportTacticsLongImage('base')">
-            方式1：仅基础站位
+            方式1：基础站位
           </button>
-          <button class="export-mode-btn" onclick="exportTacticsLongImage('variation')">
-            方式2：仅变化站位
+          <button class="export-mode-btn" onclick="exportTacticsLongImage('serve')">
+            方式2：发球站位
           </button>
-          <button class="export-mode-btn" onclick="exportTacticsLongImage('compare')">
-            方式3：基础 / 变化左右并排
+          <button class="export-mode-btn" onclick="exportTacticsLongImage('receive')">
+            方式3：接发球站位
+          </button>
+          <button class="export-mode-btn" onclick="exportTacticsLongImage('serveReceive')">
+            方式4：发&接发站位
           </button>
         </div>
       </div>
@@ -127,13 +131,13 @@
       drawRotationTitle(ctx, displayRotation, y, layout);
       y += layout.rotationTitleHeight;
 
-      if (mode === 'compare') {
-        drawCourtCaption(ctx, '基础站位', layout.margin, y, layout.courtWidth);
-        drawCourtCaption(ctx, '变化站位', layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth);
+      if (mode === 'serveReceive') {
+        drawCourtCaption(ctx, '发球站位', layout.margin, y, layout.courtWidth);
+        drawCourtCaption(ctx, '接发球站位', layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth);
         y += layout.captionHeight;
 
-        drawCourt(ctx, layout.margin, y, layout.courtWidth, layout.courtHeight, players, 'base', effectiveRotation);
-        drawCourt(ctx, layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth, layout.courtHeight, players, 'variation', effectiveRotation);
+        drawCourt(ctx, layout.margin, y, layout.courtWidth, layout.courtHeight, players, 'serve', effectiveRotation);
+        drawCourt(ctx, layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth, layout.courtHeight, players, 'receive', effectiveRotation);
         y += layout.courtHeight;
       } else {
         drawCourt(ctx, layout.margin, y, layout.courtWidth, layout.courtHeight, players, mode, effectiveRotation);
@@ -163,7 +167,7 @@
     const sectionPadding = 28;
     const dividerGap = 28;
 
-    if (mode === 'compare') {
+    if (mode === 'serveReceive') {
       const courtWidth = 500;
       const courtHeight = 375;
       const sectionHeight = rotationTitleHeight + captionHeight + courtHeight + sectionPadding + dividerGap;
@@ -217,12 +221,42 @@
     ctx.fillText(`${title} - ${EXPORT_MODES[mode]}`, layout.width / 2, 44);
   }
 
+  function getRotationScorePoints(displayRotation) {
+    const start = displayRotation - 1;
+    const scores = [];
+
+    for (let score = start; score <= 21; score += TOTAL_ROTATIONS) {
+      scores.push(score);
+    }
+
+    return scores;
+  }
+
   function drawRotationTitle(ctx, displayRotation, y, layout) {
-    ctx.fillStyle = '#333333';
+    const scores = getRotationScorePoints(displayRotation);
+    const baseText = `第${displayRotation}轮：对应分数`;
+
     ctx.font = 'bold 26px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`第 ${displayRotation} 轮`, layout.margin, y + 22);
+
+    let x = layout.margin;
+    const centerY = y + 22;
+
+    ctx.fillStyle = '#333333';
+    ctx.fillText(baseText, x, centerY);
+    x += ctx.measureText(baseText).width + 12;
+
+    scores.forEach(score => {
+      const text = String(score);
+
+      ctx.fillStyle = (score === 15 || score === 21)
+        ? '#E53935'
+        : '#333333';
+
+      ctx.fillText(text, x, centerY);
+      x += ctx.measureText(text).width + 14;
+    });
   }
 
   function drawCourtCaption(ctx, text, x, y, width) {
@@ -305,7 +339,7 @@
   function drawPlayer(ctx, courtX, courtY, courtWidth, courtHeight, player, coords) {
     const cx = courtX + (coords.x / 100) * courtWidth;
     const cy = courtY + (coords.y / 100) * courtHeight;
-    const radius = Math.max(24, courtWidth * 0.055);
+    const radius = Math.max(32, courtWidth * 0.073); // 球员大小调整
 
     const isHighlight = player.role === 'setter';
 
@@ -328,7 +362,7 @@
     ctx.stroke();
 
     ctx.fillStyle = '#FFFFFF';
-    ctx.font = `bold ${Math.round(radius * 0.42)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.font = `bold ${Math.round(radius * 0.46)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
@@ -346,11 +380,12 @@
       return getPositionCoords(player.position);
     }
 
+    const scene = mode === 'receive' ? 'receive' : 'serve';
     const rotationKey = String(effectiveRotation);
     const posKey = String(player.position);
 
     return (
-      gameState.customPositions[rotationKey]?.[posKey] ||
+      gameState.customPositions[scene]?.[rotationKey]?.[posKey] ||
       player.coords ||
       getPositionCoords(player.position)
     );

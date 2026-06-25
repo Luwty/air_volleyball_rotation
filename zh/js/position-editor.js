@@ -8,10 +8,14 @@ function clonePositionMap(map) {
   return JSON.parse(JSON.stringify(map || {}));
 }
 
-function getPositionBucket(source, rotation) {
-  const key = String(rotation);
-  if (!source[key]) source[key] = {};
-  return source[key];
+function getPositionSceneBucket(source, scene, rotation) {
+  const sceneKey = scene || 'serve';
+  const rotationKey = String(rotation);
+
+  if (!source[sceneKey]) source[sceneKey] = {};
+  if (!source[sceneKey][rotationKey]) source[sceneKey][rotationKey] = {};
+
+  return source[sceneKey][rotationKey];
 }
 
 function getPlayerRenderCoords(player) {
@@ -19,13 +23,15 @@ function getPlayerRenderCoords(player) {
     return getPositionCoords(player.position);
   }
 
+  const scene = gameState.positionScene || 'serve';
   const rotation = String(getCurrentEffectiveRotation());
   const pos = String(player.position);
 
   return (
-    gameState.draftPositions[rotation]?.[pos] ||
-    gameState.customPositions[rotation]?.[pos] ||
-    player.coords
+    gameState.draftPositions[scene]?.[rotation]?.[pos] ||
+    gameState.customPositions[scene]?.[rotation]?.[pos] ||
+    player.coords ||
+    getPositionCoords(player.position)
   );
 }
 
@@ -33,8 +39,9 @@ function beginPositionEdit() {
   gameState.isEditingPositions = true;
   gameState.draftPositions = clonePositionMap(gameState.customPositions);
 
+  const scene = gameState.positionScene || 'serve';
   const rotation = getCurrentEffectiveRotation();
-  const bucket = getPositionBucket(gameState.draftPositions, rotation);
+  const bucket = getPositionSceneBucket(gameState.draftPositions, scene, rotation);
 
   gameState.players.forEach(player => {
     const pos = String(player.position);
@@ -45,10 +52,10 @@ function beginPositionEdit() {
 }
 
 function savePositionDraft() {
+  const scene = gameState.positionScene || 'serve';
   const rotation = getCurrentEffectiveRotation();
-  const bucket = getPositionBucket(gameState.draftPositions, rotation);
+  const bucket = getPositionSceneBucket(gameState.draftPositions, scene, rotation);
 
-  // 保存前从 DOM 再读一次，避免刚拖完马上点保存时坐标没同步
   gameState.players.forEach(player => {
     const el = document.getElementById(player.id);
     if (!el) return;
@@ -66,11 +73,14 @@ function savePositionDraft() {
 function resetCurrentRotationPositionsToBase() {
   if (!gameState.isEditingPositions || gameState.isOriginalPosition) return;
 
+  const scene = gameState.positionScene || 'serve';
   const rotation = getCurrentEffectiveRotation();
-  const bucket = getPositionBucket(gameState.draftPositions, rotation);
+  const bucket = getPositionSceneBucket(gameState.draftPositions, scene, rotation);
 
   gameState.players.forEach(player => {
-    bucket[String(player.position)] = { ...getPositionCoords(player.position) };
+    bucket[String(player.position)] = {
+      ...getPositionCoords(player.position)
+    };
   });
 
   renderPlayers();
@@ -140,8 +150,10 @@ function bindPlayerDrag(playerDiv, player) {
         y: Math.min(100 - radiusY, Math.max(radiusY, Number((pointerY + offsetY).toFixed(1))))
       };
 
+      const scene = gameState.positionScene || 'serve';
       const rotation = getCurrentEffectiveRotation();
-      const bucket = getPositionBucket(gameState.draftPositions, rotation);
+      const bucket = getPositionSceneBucket(gameState.draftPositions, scene, rotation);
+
       bucket[String(player.position)] = next;
 
       playerDiv.style.left = next.x + '%';
