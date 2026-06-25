@@ -43,36 +43,6 @@ const ACTUAL_POSITIONS = {
 };
 
 /**
- * 二传插上后的目标位置（前排传球位置）
- */
-const SETTER_TARGET_POSITION = { x: 63.33, y: 28 };
-
-/**
- * 插上路线配置（使用贝塞尔曲线，百分比坐标）
- * 包含起点、终点和控制点
- */
-const PENETRATION_ROUTES = {
-  1: {  // 从1号位插上（右后方）
-    start: { x: 75, y: 78 },
-    end: { x: 63.33, y: 28 },
-    control: { x: 78, y: 52 },
-    description: '从右后方快速插上'
-  },
-  // 6: {  // 从6号位插上（正后方）
-  //   start: { x: 50, y: 72 },
-  //   end: { x: 50, y: 28 },
-  //   control: { x: 50, y: 50 },
-  //   description: '从正后方直线插上'
-  // },
-  5: {  // 从5号位插上（左后方）
-    start: { x: 25, y: 78 },
-    end: { x: 36.67, y: 28 },
-    control: { x: 22, y: 52 },
-    description: '从左后方插上，路线最长'
-  }
-};
-
-/**
  * 获取指定轮次的二传位置
  * @param {number} rotation - 轮次 (1-6)
  * @returns {number} 二传所在位置 (1-6)
@@ -93,28 +63,6 @@ function getSetterPosition(rotation) {
  */
 function isSetterInFrontRow(position) {
   return [2, 3, 4].includes(position);
-}
-
-/**
- * 判断二传是否需要插上
- * 只有在后排时才需要插上
- * @param {number} position - 位置 (1-6)
- * @returns {boolean} 是否需要插上
- */
-function needsPenetration(position) {
-  return [1, 5].includes(position);
-}
-
-/**
- * 获取插上路线配置
- * @param {number} position - 当前位置 (1, 5, 6)
- * @returns {object} 路线配置对象
- */
-function getPenetrationRoute(position) {
-  if (!needsPenetration(position)) {
-    return null;
-  }
-  return PENETRATION_ROUTES[position];
 }
 
 /**
@@ -159,8 +107,7 @@ function getStatusText(rotation, position, isFrontRow) {
       return `第${rotation}轮：二传在前排${position}号位，位置稍偏，但不需要插上`;
     }
   } else {
-    const route = PENETRATION_ROUTES[position];
-    return `第${rotation}轮：二传在后排${position}号位，需要插上！${route.description}`;
+    return `第${rotation}轮：二传在后排${position}号位`;
   }
 }
 
@@ -177,13 +124,32 @@ function getAllPlayersPositions(rotation) {
   // 4号位：接应，5号位：主攻，6号位：副攻(自)
   const baseRoles = {
     1: '二传',
-    2: '大主攻',
-    3: '自由',
+    2: '攻手A',
+    3: '自由人',
     4: '接应',
-    5: '小主攻',
+    5: '攻手B',
   };
 
   const players = [];
+  const FRONT_POSITIONS = [2, 3, 4];
+  const ATTACKER_BASE_POSITIONS = [2, 5]; // 2=攻手A，5=攻手B
+
+  function getBasePosAtCourtPos(pos) {
+    return ((pos - 1 + (rotation - 1)) % 5) + 1;
+  }
+
+  function getHighlightedAttackerBasePos() {
+    const frontAttackers = FRONT_POSITIONS
+      .map(pos => getBasePosAtCourtPos(pos))
+      .filter(basePos => ATTACKER_BASE_POSITIONS.includes(basePos));
+
+    // 五人轮转特殊轮次：攻手A、攻手B都在前排时，只高亮攻手A
+    if (frontAttackers.includes(2)) return 2;
+
+    return frontAttackers[0] || null;
+  }
+
+  const highlightedAttackerBasePos = getHighlightedAttackerBasePos();
 
   // 注释懒得改,现在是气排球规则,下面的注释都是旧的
   // 根据轮转计算当前轮次每个位置的角色
@@ -191,7 +157,7 @@ function getAllPlayersPositions(rotation) {
   for (let pos = 1; pos <= 5; pos++) {
     // 计算这个位置在第1轮时是哪个位置 (basePos)
     // 比如：当前 pos=1 (后排右), rotation=2, 则 basePos = (1-1 + 2-1)%6 + 1 = 2 (原来是2号位的人转到了1号位)
-    const basePos = ((pos - 1 + (rotation - 1)) % 5) + 1;
+    const basePos = getBasePosAtCourtPos(pos);
 
     let roleName = baseRoles[basePos];
 
@@ -225,12 +191,14 @@ function getAllPlayersPositions(rotation) {
     // 2. 主攻：在前排时高亮 (yellow)，后排时普通 (gray)
     // 3. 其他：普通颜色 (gray)
 
-    let isHighlight = false;
+    // let isHighlight = false;
 
-    // 如果角色是"主攻" (basePos 2 或 5) 且 在前排 (2,3,4号位) -> 高亮
-    if ((basePos === 2 || basePos === 4) && [2, 3, 4].includes(pos)) {
-      isHighlight = true;
-    }
+    // // 如果角色是"主攻" (basePos 2 或 5) 且 在前排 (2,3,4号位) -> 高亮
+    // if ((basePos === 2 || basePos === 4) && [2, 3, 4].includes(pos)) {
+    //   isHighlight = true;
+    // }
+
+    const isHighlight = FRONT_POSITIONS.includes(pos) && basePos === highlightedAttackerBasePos;
 
     // 获取实际站位坐标（如果配置了ACTUAL_POSITIONS，否则使用标准坐标）
     let actualCoords = POSITION_COORDS[pos];

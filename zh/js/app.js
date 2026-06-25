@@ -11,11 +11,11 @@ let gameState = {
   rotationOffset: 0,               // 轮次偏移 (用户设置二传起始位置时改变)
   setterPosition: 2,               // 二传位置 (1-6)
   isSetterFrontRow: true,          // 二传是否在前排
-  needsPenetration: false,         // 是否需要插上
+  // needsPenetration: false,         // 是否需要插上
   statusText: '',                  // 状态提示文字
   players: [],                     // 所有球员数据
-  originalSetterCoords: {},        // 二传起始坐标
-  showPenetrationRoute: true,      // 是否显示插上路线
+  // originalSetterCoords: {},        // 二传起始坐标
+  // showPenetrationRoute: true,      // 是否显示插上路线
   isAnimating: false,              // 是否正在播放动画
   isOriginalPosition: true,        // 是否显示原始站位
   customNames: {},                  // 用户自定义球员名字 (key: player-base-X)
@@ -158,10 +158,23 @@ function showPage(pageName) {
     targetPage.classList.add('active');
     currentPage = pageName;
 
+    updateDrawerVisibility();
     // 如果是setter页面，初始化游戏
     if (pageName === 'setter') {
       initSetterPage();
     }
+  }
+}
+
+function updateDrawerVisibility() {
+  const drawer = document.getElementById('side-drawer');
+  if (!drawer) return;
+
+  const shouldShow = currentPage === 'setter';
+  drawer.classList.toggle('drawer-visible', shouldShow);
+
+  if (!shouldShow) {
+    drawer.classList.remove('open');
   }
 }
 
@@ -234,24 +247,24 @@ function initRotation() {
 
   const setterPos = getSetterPosition(effectiveRotation);
   const isFrontRow = isSetterInFrontRow(setterPos);
-  const needsPen = needsPenetration(setterPos);
+  // const needsPen = needsPenetration(setterPos);
   const statusText = getStatusText(effectiveRotation, setterPos, isFrontRow);
   const players = getAllPlayersPositions(effectiveRotation);
 
   gameState.setterPosition = setterPos;
   gameState.isSetterFrontRow = isFrontRow;
-  gameState.needsPenetration = needsPen;
+  // gameState.needsPenetration = needsPen;
   gameState.statusText = statusText;
   gameState.players = players;
-  gameState.originalSetterCoords = getPositionCoords(setterPos);
+  // gameState.originalSetterCoords = getPositionCoords(setterPos);
 
-  console.log('当前状态：', {
-    displayRotation: rotation,
-    effectiveRotation: effectiveRotation,
-    setterPos,
-    isFrontRow,
-    needsPen
-  });
+  // console.log('当前状态：', {
+  //   displayRotation: rotation,
+  //   effectiveRotation: effectiveRotation,
+  //   setterPos,
+  //   isFrontRow,
+  //   needsPen
+  // });
 }
 
 /**
@@ -391,33 +404,11 @@ function updateUI() {
   }
 
   // 更新发球图标和实际站位文字
-  const serveIndicator = document.getElementById('serve-indicator');
+  // const serveIndicator = document.getElementById('serve-indicator');
   const actualPosLabel = document.getElementById('actual-pos-label');
 
-  if (gameState.isOriginalPosition) {
-    // 原始站位模式：隐藏实际站位文字，根据条件显示反轮图标
-    if (actualPosLabel) {
-      actualPosLabel.style.display = 'none';
-    }
-
-    if (serveIndicator) {
-      if (gameState.setterPosition === 1) {
-        serveIndicator.style.display = 'inline';
-        serveIndicator.onclick = function () {
-          showModal();
-        };
-      } else {
-        serveIndicator.style.display = 'none';
-      }
-    }
-  } else {
-    // 实际接发球站位模式：显示实际站位文字，隐藏反轮图标
-    if (actualPosLabel) {
-      actualPosLabel.style.display = 'inline';
-    }
-    if (serveIndicator) {
-      serveIndicator.style.display = 'none';
-    }
+  if (actualPosLabel) {
+    actualPosLabel.style.display = gameState.isOriginalPosition ? 'none' : 'inline';
   }
 
   // 新增更新编辑按钮
@@ -425,18 +416,6 @@ function updateUI() {
 
   // 更新按钮状态
   updateButtonStates();
-
-  // 更新虚影显示
-  updateShadow();
-
-  // 绘制插上路线（只在实际接发球站位模式下显示）
-  if (gameState.needsPenetration && gameState.showPenetrationRoute && !gameState.isOriginalPosition) {
-    clearCanvas();
-  } else if (gameState.needsPenetration && gameState.showPenetrationRoute && gameState.isOriginalPosition) {
-    clearCanvas();
-  } else {
-    clearCanvas();
-  }
 }
 
 /**
@@ -496,21 +475,6 @@ function updateButtonStates() {
         nextBtnText.textContent = gameState.currentRotation === TOTAL_ROTATIONS ? '重新开始' : '下一轮 ▶';
       }
     }
-  }
-}
-
-/**
- * 更新虚影显示
- */
-function updateShadow() {
-  const shadow = document.getElementById('setter-shadow');
-  if (!shadow) return;
-
-  // 只在实际接发球站位模式下显示虚影
-  if (!gameState.isOriginalPosition && gameState.needsPenetration && gameState.showPenetrationRoute) {
-    shadow.style.display = 'none';
-  } else {
-    shadow.style.display = 'none';
   }
 }
 
@@ -597,14 +561,14 @@ function playRotationAnimation(nextRot) {
 function afterRotation(rotation, setterPos) {
   // rotation 参数已经是 effectiveRotation
   const isFrontRow = isSetterInFrontRow(setterPos);
-  const needsPen = needsPenetration(setterPos);
+  // const needsPen = needsPenetration(setterPos);
   const statusText = getStatusText(rotation, setterPos, isFrontRow);
 
   gameState.setterPosition = setterPos;
   gameState.isSetterFrontRow = isFrontRow;
-  gameState.needsPenetration = needsPen;
+  // gameState.needsPenetration = needsPen;
   gameState.statusText = statusText;
-  gameState.originalSetterCoords = getPositionCoords(setterPos);
+  // gameState.originalSetterCoords = getPositionCoords(setterPos);
 
   // 直接结束，不播放插上动画
   gameState.isAnimating = false;
@@ -612,288 +576,6 @@ function afterRotation(rotation, setterPos) {
   // 更新UI (必须在 isAnimating = false 之后调用，否则第1轮的可点击状态无法激活)
   updateUI();
   updateButtonStates();
-}
-
-/**
- * 播放插上动画
- */
-function playPenetrationAnimation(position) {
-  const route = getPenetrationRoute(position);
-  if (!route) {
-    gameState.isAnimating = false;
-    updateButtonStates();
-    return;
-  }
-
-  // 找到二传球员元素
-  const setterEl = document.querySelector('.player-setter');
-  if (!setterEl) {
-    gameState.isAnimating = false;
-    updateButtonStates();
-    return;
-  }
-
-  // 移动到目标位置
-  const targetPos = SETTER_TARGET_POSITION;
-  setterEl.style.left = targetPos.x + '%';
-  setterEl.style.top = targetPos.y + '%';
-
-  // 动画完成
-  setTimeout(() => {
-    gameState.isAnimating = false;
-    updateButtonStates();
-    console.log('插上动画完成');
-  }, 1100);
-}
-
-// ========== Canvas绘制函数 ==========
-
-/**
- * 清空Canvas
- */
-function clearCanvas() {
-  const canvas = document.getElementById('penetration-canvas');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-}
-
-/**
- * 绘制插上路线箭头
- */
-function drawPenetrationArrow(position) {
-  const route = getPenetrationRoute(position);
-  if (!route) return;
-
-  const canvas = document.getElementById('penetration-canvas');
-  if (!canvas) return;
-
-  const ctx = canvas.getContext('2d');
-
-  // 获取canvas实际尺寸
-  const rect = canvas.getBoundingClientRect();
-  const width = rect.width;
-  const height = rect.height;
-
-  // 设置canvas内部尺寸
-  canvas.width = width;
-  canvas.height = height;
-
-  // 清空画布
-  ctx.clearRect(0, 0, width, height);
-
-  // 将百分比坐标转换为像素坐标
-  const startX = (route.start.x / 100) * width;
-  const startY = (route.start.y / 100) * height;
-  const endX = (route.end.x / 100) * width;
-  const endY = (route.end.y / 100) * height;
-  const controlX = (route.control.x / 100) * width;
-  const controlY = (route.control.y / 100) * height;
-
-  // 绘制虚线箭头
-  ctx.beginPath();
-  ctx.setLineDash([10, 5]);
-  ctx.strokeStyle = '#FF9800';
-  ctx.lineWidth = 4;
-
-  // 绘制贝塞尔曲线
-  ctx.moveTo(startX, startY);
-  ctx.quadraticCurveTo(controlX, controlY, endX, endY);
-  ctx.stroke();
-
-  // 绘制箭头头部
-  drawArrowHead(ctx, endX, endY, controlX, controlY);
-
-  console.log('绘制插上路线箭头完成');
-}
-
-/**
- * 绘制箭头头部
- */
-function drawArrowHead(ctx, endX, endY, controlX, controlY) {
-  // 计算箭头方向
-  const dx = endX - controlX;
-  const dy = endY - controlY;
-  const angle = Math.atan2(dy, dx);
-
-  // 箭头参数
-  const headLength = 20;
-  const headAngle = Math.PI / 6;
-
-  ctx.save();
-  ctx.setLineDash([]);
-  ctx.fillStyle = '#FF9800';
-  ctx.beginPath();
-
-  // 箭头中心点
-  ctx.moveTo(endX, endY);
-
-  // 箭头左侧
-  ctx.lineTo(
-    endX - headLength * Math.cos(angle - headAngle),
-    endY - headLength * Math.sin(angle - headAngle)
-  );
-
-  // 箭头右侧
-  ctx.lineTo(
-    endX - headLength * Math.cos(angle + headAngle),
-    endY - headLength * Math.sin(angle + headAngle)
-  );
-
-  ctx.closePath();
-  ctx.fill();
-  ctx.restore();
-}
-
-// ========== 站位编辑函数 ==========
-
-function getCurrentEffectiveRotation() {
-  return getEffectiveRotation(gameState.currentRotation);
-}
-
-function clonePositionMap(map) {
-  return JSON.parse(JSON.stringify(map || {}));
-}
-
-function getPositionBucket(source, rotation) {
-  const key = String(rotation);
-  if (!source[key]) source[key] = {};
-  return source[key];
-}
-
-function getPlayerRenderCoords(player) {
-  if (gameState.isOriginalPosition) {
-    return getPositionCoords(player.position);
-  }
-
-  const rotation = String(getCurrentEffectiveRotation());
-  const pos = String(player.position);
-
-  return (
-    gameState.draftPositions[rotation]?.[pos] ||
-    gameState.customPositions[rotation]?.[pos] ||
-    player.coords
-  );
-}
-
-function beginPositionEdit() {
-  gameState.isEditingPositions = true;
-  gameState.draftPositions = clonePositionMap(gameState.customPositions);
-
-  const rotation = getCurrentEffectiveRotation();
-  const bucket = getPositionBucket(gameState.draftPositions, rotation);
-
-  gameState.players.forEach(player => {
-    const pos = String(player.position);
-    if (!bucket[pos]) {
-      bucket[pos] = getPlayerRenderCoords(player);
-    }
-  });
-}
-
-function savePositionDraft() {
-  const rotation = getCurrentEffectiveRotation();
-  const bucket = getPositionBucket(gameState.draftPositions, rotation);
-
-  // 保存前从 DOM 再读一次，避免刚拖完马上点保存时坐标没同步
-  gameState.players.forEach(player => {
-    const el = document.getElementById(player.id);
-    if (!el) return;
-
-    bucket[String(player.position)] = {
-      x: Number((parseFloat(el.style.left) || 0).toFixed(1)),
-      y: Number((parseFloat(el.style.top) || 0).toFixed(1))
-    };
-  });
-
-  gameState.customPositions = clonePositionMap(gameState.draftPositions);
-  saveCustomPositions();
-}
-
-function exitPositionEdit() {
-  gameState.isEditingPositions = false;
-  gameState.draftPositions = {};
-}
-
-function togglePositionEdit() {
-  if (gameState.isOriginalPosition) return;
-
-  if (gameState.isEditingPositions) {
-    savePositionDraft();
-    exitPositionEdit();
-
-    // 先退出编辑样式，再重新渲染，保证球员移动动画恢复
-    updateUI();
-    renderPlayers();
-    return;
-  }
-
-  beginPositionEdit();
-  updateUI();
-  renderPlayers();
-}
-
-function bindPlayerDrag(playerDiv, player) {
-  playerDiv.onpointerdown = null;
-
-  const canDrag = gameState.isEditingPositions && !gameState.isOriginalPosition;
-  playerDiv.style.touchAction = canDrag ? 'none' : '';
-
-  if (!canDrag) return;
-
-  playerDiv.onpointerdown = function (e) {
-    if (e.button !== undefined && e.button !== 0) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const court = document.getElementById('court');
-    if (!court) return;
-
-    const rect = court.getBoundingClientRect();
-    const currentX = parseFloat(playerDiv.style.left) || 50;
-    const currentY = parseFloat(playerDiv.style.top) || 50;
-    const startPointerX = ((e.clientX - rect.left) / rect.width) * 100;
-    const startPointerY = ((e.clientY - rect.top) / rect.height) * 100;
-    const offsetX = currentX - startPointerX;
-    const offsetY = currentY - startPointerY;
-
-    const radiusX = (playerDiv.offsetWidth / 2 / rect.width) * 100;
-    const radiusY = (playerDiv.offsetHeight / 2 / rect.height) * 100;
-
-    playerDiv.setPointerCapture?.(e.pointerId);
-    playerDiv.classList.add('dragging');
-
-    const moveTo = evt => {
-      const pointerX = ((evt.clientX - rect.left) / rect.width) * 100;
-      const pointerY = ((evt.clientY - rect.top) / rect.height) * 100;
-
-      const next = {
-        x: Math.min(100 - radiusX, Math.max(radiusX, Number((pointerX + offsetX).toFixed(1)))),
-        y: Math.min(100 - radiusY, Math.max(radiusY, Number((pointerY + offsetY).toFixed(1))))
-      };
-
-      const rotation = getCurrentEffectiveRotation();
-      const bucket = getPositionBucket(gameState.draftPositions, rotation);
-      bucket[String(player.position)] = next;
-
-      playerDiv.style.left = next.x + '%';
-      playerDiv.style.top = next.y + '%';
-    };
-
-    const stop = () => {
-      playerDiv.classList.remove('dragging');
-      playerDiv.releasePointerCapture?.(e.pointerId);
-      playerDiv.removeEventListener('pointermove', moveTo);
-      playerDiv.removeEventListener('pointerup', stop);
-      playerDiv.removeEventListener('pointercancel', stop);
-    };
-
-    playerDiv.addEventListener('pointermove', moveTo);
-    playerDiv.addEventListener('pointerup', stop);
-    playerDiv.addEventListener('pointercancel', stop);
-  };
 }
 
 // ========== 开关控制函数 ==========
@@ -934,32 +616,6 @@ function updateCourtLabels() {
     }
   }
 }
-
-// ========== 模态框控制 ==========
-
-function showModal() {
-  const modal = document.getElementById('rotation-modal');
-  if (modal) {
-    modal.classList.add('show');
-  }
-}
-
-function closeModal() {
-  const modal = document.getElementById('rotation-modal');
-  if (modal) {
-    modal.classList.remove('show');
-  }
-}
-
-// ========== 窗口大小调整 ==========
-window.addEventListener('resize', function () {
-  // 重新绘制箭头（如果需要）
-  if (currentPage === 'setter' && gameState.needsPenetration && gameState.showPenetrationRoute) {
-    setTimeout(() => {
-      drawPenetrationArrow(gameState.setterPosition);
-    }, 100);
-  }
-});
 
 // ========== 开轮设置模态框控制 ==========
 
@@ -1074,165 +730,3 @@ window.onclick = function (event) {
     closeStartPosModal();
   }
 }
-
-
-// // 导入导出逻辑
-
-// function getCurrentPresetTitle() {
-//     const input = document.getElementById('formation-title-input');
-//     const title = input?.value?.trim() || gameState.formationTitle || '未命名站位';
-
-//     gameState.formationTitle = title;
-//     localStorage.setItem(FORMATION_TITLE_KEY, title);
-
-//     return title;
-// }
-
-// function buildPositionPreset() {
-//     return {
-//         schema: 'air-volleyball-position-preset',
-//         version: PRESET_SCHEMA_VERSION,
-//         exportedAt: new Date().toISOString(),
-
-//         title: getCurrentPresetTitle(),
-
-//         // 只用于校验，不用于覆盖基础坐标
-//         totalRotations: TOTAL_ROTATIONS,
-//         setterPositions: SETTER_POSITIONS,
-
-//         // 五个球员名
-//         customNames: gameState.customNames || {},
-
-//         // 只保存接发球变化站位
-//         variationPositions: gameState.customPositions || {},
-
-//         // 可选：备注也保存
-//         note: localStorage.getItem(DRAWER_NOTE_KEY) || ''
-//     };
-// }
-
-// function exportPositionPreset() {
-//     if (gameState.isEditingPositions) {
-//         alert('请先保存正在编辑的站位，再导出');
-//         return;
-//     }
-
-//     const preset = buildPositionPreset();
-//     const json = JSON.stringify(preset, null, 2);
-
-//     const blob = new Blob([json], {
-//         type: 'application/json;charset=utf-8'
-//     });
-
-//     const url = URL.createObjectURL(blob);
-//     const link = document.createElement('a');
-
-//     const safeTitle = preset.title.replace(/[\\/:*?"<>|]/g, '_');
-
-//     link.href = url;
-//     link.download = `${safeTitle}-气排球站位.json`;
-//     link.click();
-
-//     URL.revokeObjectURL(url);
-// }
-
-// function triggerImportPreset() {
-//     const input = document.getElementById('preset-file-input');
-//     if (!input) return;
-
-//     input.value = '';
-//     input.click();
-// }
-
-// function importPositionPreset(event) {
-//     const file = event.target.files?.[0];
-//     if (!file) return;
-
-//     const reader = new FileReader();
-
-//     reader.onload = function () {
-//         try {
-//             const preset = JSON.parse(reader.result);
-//             confirmAndApplyPositionPreset(preset);
-//         } catch (error) {
-//             alert('导入失败：文件不是有效的 JSON 格式');
-//         }
-//     };
-
-//     reader.readAsText(file, 'utf-8');
-// }
-
-// function validatePositionPreset(preset) {
-//     if (!preset || typeof preset !== 'object') {
-//         return false;
-//     }
-
-//     if (preset.schema !== 'air-volleyball-position-preset') {
-//         return false;
-//     }
-
-//     if (preset.totalRotations && preset.totalRotations !== TOTAL_ROTATIONS) {
-//         return false;
-//     }
-
-//     if (!preset.customNames || typeof preset.customNames !== 'object') {
-//         return false;
-//     }
-
-//     if (!preset.variationPositions || typeof preset.variationPositions !== 'object') {
-//         return false;
-//     }
-
-//     return true;
-// }
-
-// function confirmAndApplyPositionPreset(preset) {
-//     if (!validatePositionPreset(preset)) {
-//         alert('导入失败：这不是有效的五人气排球站位预设文件');
-//         return;
-//     }
-
-//     const title = preset.title || '未命名站位';
-
-//     const ok = window.confirm(
-//         `是否应用「${title}」的站位设置？`
-//     );
-
-//     if (!ok) return;
-
-//     applyPositionPreset(preset);
-// }
-
-// function applyPositionPreset(preset) {
-//     const title = preset.title || '未命名站位';
-
-//     gameState.formationTitle = title;
-//     gameState.customNames = preset.customNames || {};
-//     gameState.customPositions = preset.variationPositions || {};
-//     gameState.draftPositions = {};
-//     gameState.isEditingPositions = false;
-
-//     localStorage.setItem(FORMATION_TITLE_KEY, title);
-//     localStorage.setItem(CUSTOM_NAMES_KEY, JSON.stringify(gameState.customNames));
-//     saveCustomPositions();
-
-//     if (typeof preset.note === 'string') {
-//         localStorage.setItem(DRAWER_NOTE_KEY, preset.note);
-
-//         const note = document.getElementById('drawer-note');
-//         if (note) {
-//             note.value = preset.note;
-//         }
-//     }
-
-//     const titleInput = document.getElementById('formation-title-input');
-//     if (titleInput) {
-//         titleInput.value = title;
-//     }
-
-//     initRotation();
-//     renderPlayers();
-//     updateUI();
-
-//     alert(`已应用「${title}」的站位设置`);
-// }

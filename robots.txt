@@ -2,3 +2,6 @@ User-agent: *
 Allow: /
 
 Sitemap: https://jerrypeibuilds.github.io/volleyball-setter/sitemap.xml
+
+localStorage.removeItem('air_volleyball_5_custom_ns');
+location.reload();
