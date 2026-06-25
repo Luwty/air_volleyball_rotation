@@ -1,9 +1,47 @@
 (function () {
+  const COURT_SCENES = {
+    base: {
+      label: '基础站位',
+      coordsMode: 'base',
+      attackLineRatio: 0.5,
+      showPositionLabels: true
+    },
+
+    serve: {
+      label: '发球站位',
+      coordsMode: 'serve',
+      attackLineRatio: 0.333,
+      showPositionLabels: false
+    },
+
+    receive: {
+      label: '接发球站位',
+      coordsMode: 'receive',
+      attackLineRatio: 0.333,
+      showPositionLabels: false
+    }
+  };
+
   const EXPORT_MODES = {
-    base: '基础站位',
-    serve: '发球站位',
-    receive: '接发球站位',
-    serveReceive: '发 / 接发球站位'
+    base: {
+      label: '基础站位',
+      courts: ['base']
+    },
+
+    serve: {
+      label: '发球站位',
+      courts: ['serve']
+    },
+
+    receive: {
+      label: '接发球站位',
+      courts: ['receive']
+    },
+
+    serveReceive: {
+      label: '发 / 接发球站位',
+      courts: ['serve', 'receive']
+    }
   };
 
   document.addEventListener('DOMContentLoaded', function () {
@@ -108,6 +146,7 @@
   window.exportTacticsLongImage = function (mode) {
     closeTacticsExportModal();
 
+    const exportMode = EXPORT_MODES[mode] || EXPORT_MODES.base;
     const title = getExportTitle();
     const layout = getLayout(mode);
     const scale = Math.max(2, window.devicePixelRatio || 1);
@@ -131,74 +170,49 @@
       drawRotationTitle(ctx, displayRotation, y, layout);
       y += layout.rotationTitleHeight;
 
-      if (mode === 'serveReceive') {
-        drawCourtCaption(ctx, '发球站位', layout.margin, y, layout.courtWidth);
-        drawCourtCaption(ctx, '接发球站位', layout.margin + layout.courtWidth + layout.gap, y, layout.courtWidth);
+      if (exportMode.courts.length > 1) {
+        exportMode.courts.forEach((sceneKey, index) => {
+          const scene = COURT_SCENES[sceneKey];
+          const courtX = layout.margin + index * (layout.courtWidth + layout.gap);
+
+          drawCourtCaption(ctx, scene.label, courtX, y, layout.courtWidth);
+        });
+
         y += layout.captionHeight;
-
-        drawCourt(
-          ctx,
-          layout.margin,
-          y,
-          layout.courtWidth,
-          layout.courtHeight,
-          players,
-          'serve',
-          effectiveRotation,
-          {
-            attackLineRatio: 0.333,
-            showPositionLabels: false
-          }
-        );
-
-        drawCourt(
-          ctx,
-          layout.margin + layout.courtWidth + layout.gap,
-          y,
-          layout.courtWidth,
-          layout.courtHeight,
-          players,
-          'receive',
-          effectiveRotation,
-          {
-            attackLineRatio: 0.333,
-            showPositionLabels: false
-          }
-        );
-      } else {
-        drawCourt(
-          ctx,
-          layout.margin,
-          y,
-          layout.courtWidth,
-          layout.courtHeight,
-          players,
-          mode,
-          effectiveRotation,
-          getCourtRenderOptions(mode)
-        );
-        y += layout.courtHeight;
       }
+
+      exportMode.courts.forEach((sceneKey, index) => {
+        const courtX = layout.margin + index * (layout.courtWidth + layout.gap);
+
+        drawCourt(
+          ctx,
+          courtX,
+          y,
+          layout.courtWidth,
+          layout.courtHeight,
+          players,
+          sceneKey,
+          effectiveRotation,
+          getCourtRenderOptions(sceneKey)
+        );
+      });
+
+      y += layout.courtHeight;
 
       y += layout.sectionPadding;
       drawDivider(ctx, y, layout);
       y += layout.dividerGap;
     }
 
-    downloadCanvas(canvas, `${title}-${EXPORT_MODES[mode]}.png`);
+    downloadCanvas(canvas, `${title}-${exportMode.label}.png`);
   };
 
-  function getCourtRenderOptions(mode) {
-    if (mode === 'base') {
-      return {
-        attackLineRatio: 0.5,
-        showPositionLabels: true
-      };
-    }
+  function getCourtRenderOptions(sceneKey) {
+    const scene = COURT_SCENES[sceneKey] || COURT_SCENES.base;
 
     return {
-      attackLineRatio: 0.333,
-      showPositionLabels: false
+      attackLineRatio: scene.attackLineRatio,
+      showPositionLabels: scene.showPositionLabels
     };
   }
 
@@ -265,11 +279,13 @@
   }
 
   function drawMainTitle(ctx, title, mode, layout) {
+    const exportMode = EXPORT_MODES[mode] || EXPORT_MODES.base;
+
     ctx.fillStyle = '#C44569';
     ctx.font = 'bold 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(`${title} - ${EXPORT_MODES[mode]}`, layout.width / 2, 44);
+    ctx.fillText(`${title} - ${exportMode.label}`, layout.width / 2, 44);
   }
 
   function getRotationScorePoints(displayRotation) {
@@ -438,17 +454,18 @@
     return gameState.customNames[nameKey] || player.name;
   }
 
-  function getExportCoords(player, mode, effectiveRotation) {
-    if (mode === 'base') {
+  function getExportCoords(player, sceneKey, effectiveRotation) {
+    const scene = COURT_SCENES[sceneKey] || COURT_SCENES.base;
+
+    if (scene.coordsMode === 'base') {
       return getPositionCoords(player.position);
     }
 
-    const scene = mode === 'receive' ? 'receive' : 'serve';
     const rotationKey = String(effectiveRotation);
     const posKey = String(player.position);
 
     return (
-      gameState.customPositions[scene]?.[rotationKey]?.[posKey] ||
+      gameState.customPositions[scene.coordsMode]?.[rotationKey]?.[posKey] ||
       player.coords ||
       getPositionCoords(player.position)
     );
