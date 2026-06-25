@@ -1325,12 +1325,17 @@ input:checked+.slider:before {
 
 /* ========== 导入导出按钮 ========== */
 .preset-actions {
+  display: none;
   position: fixed;
   top: 1rem;
   right: 5rem;
   z-index: 200;
   display: flex;
   gap: 0.5rem;
+}
+
+.preset-actions.actions-visible {
+  display: flex;
 }
 
 .preset-icon-btn {
@@ -1567,4 +1572,101 @@ input:checked+.slider:before {
 
 .court-container.position-editing .position-reset-btn {
   display: block;
+}
+
+
+/* ========== 移动端球场页压缩 ========== */
+
+@media screen and (max-width: 480px) {
+  .setter-container {
+    padding-top: 4.25rem;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .formation-title-row {
+    margin-top: 0.5rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .top-info,
+  .court-wrapper,
+  .control-panel {
+    max-width: 100%;
+  }
+
+  .top-info {
+    margin-bottom: 0.9rem;
+  }
+
+  .rotation-info {
+    padding: 0.75rem 0.85rem;
+    border-radius: 0.75rem;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 0.35rem;
+    min-width: 0;
+  }
+
+  .rotation-label,
+  .rotation-value,
+  .actual-pos-label {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .rotation-label {
+    font-size: 1rem;
+  }
+
+  .rotation-value {
+    font-size: 1.25rem;
+    margin-left: 0.25rem;
+  }
+
+  .actual-pos-label {
+    margin-left: 0.35rem;
+    font-size: 1rem;
+    letter-spacing: 0;
+  }
+
+  .court-wrapper {
+    margin-bottom: 1rem;
+  }
+
+  .position-label {
+    font-size: 9.5rem;
+  }
+
+  .player {
+    width: 4.2rem;
+    height: 4.2rem;
+    border-width: 2px;
+  }
+
+  .player-role,
+  .player-name-input {
+    font-size: 1.05rem;
+  }
+
+  .edit-hint {
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+
+  .button-row {
+    gap: 0.75rem;
+  }
+
+  .btn-control {
+    height: 3.6rem;
+    line-height: 3.6rem;
+    border-radius: 1.8rem;
+    font-size: 1.15rem;
+  }
+
+  .position-action-row {
+    margin-top: 0.75rem !important;
+  }
 }

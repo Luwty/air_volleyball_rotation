@@ -159,6 +159,7 @@ function showPage(pageName) {
     currentPage = pageName;
 
     updateDrawerVisibility();
+    updateTopActionsVisibility();
     // 如果是setter页面，初始化游戏
     if (pageName === 'setter') {
       initSetterPage();
@@ -176,6 +177,13 @@ function updateDrawerVisibility() {
   if (!shouldShow) {
     drawer.classList.remove('open');
   }
+}
+
+function updateTopActionsVisibility() {
+  const actions = document.querySelector('.preset-actions');
+  if (!actions) return;
+
+  actions.classList.toggle('actions-visible', currentPage === 'setter');
 }
 
 /**
