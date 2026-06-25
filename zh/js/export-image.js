@@ -315,8 +315,8 @@
     ctx.strokeStyle = '#666666';
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(x + width * 0.035, y + height * 0.5);
-    ctx.lineTo(x + width * 0.965, y + height * 0.5);
+    ctx.moveTo(x + width * 0.035, y + height * 0.333);
+    ctx.lineTo(x + width * 0.965, y + height * 0.333);
     ctx.stroke();
   }
 
