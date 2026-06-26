@@ -4,8 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <meta name="description" content="排球二传插上教学 - 帮助初高中女排学员理解二传插上技术">
-  <title>排球轮次站位教学 - 5-1阵型与二传插上可视化</title>
+  <meta name="description" content="排球站位可视化--自定义战术">
+  <title>排球轮次站位可视化</title>
 
   <!-- Canonical & language alternates -->
   <link rel="canonical" href="https://jerrypeibuilds.github.io/volleyball-setter/zh/">
@@ -21,8 +21,18 @@
   <!-- <div class="lang-switch" onclick="switchLang()">EN</div> -->
   <!-- 导入导出按钮 -->
   <div class="preset-actions">
-    <button class="preset-icon-btn" title="导出站位" onclick="exportPositionPreset()">导出</button>
-    <button class="preset-icon-btn" title="导入站位" onclick="triggerImportPreset()">导入</button>
+    <div class="preset-menu-wrapper">
+      <button class="preset-icon-btn" title="模板" onclick="togglePresetMenu(event)">模板</button>
+
+      <div id="preset-menu" class="preset-menu">
+        <button type="button" class="preset-menu-item" onclick="handlePresetMenuAction('import')">
+          导入预设
+        </button>
+        <button type="button" class="preset-menu-item" onclick="handlePresetMenuAction('export')">
+          导出配置
+        </button>
+      </div>
+    </div>
 
     <input id="preset-file-input" type="file" accept=".json,application/json" style="display: none;"
       onchange="importPositionPreset(event)">

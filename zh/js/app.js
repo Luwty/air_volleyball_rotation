@@ -211,8 +211,49 @@ function updateTopActionsVisibility() {
   const actions = document.querySelector('.preset-actions');
   if (!actions) return;
 
-  actions.classList.toggle('actions-visible', currentPage === 'setter');
+  const shouldShow = currentPage === 'setter';
+  actions.classList.toggle('actions-visible', shouldShow);
+
+  if (!shouldShow) {
+    closePresetMenu();
+  }
 }
+
+function togglePresetMenu(event) {
+  event.stopPropagation();
+
+  const menu = document.getElementById('preset-menu');
+  if (!menu) return;
+
+  menu.classList.toggle('show');
+}
+
+function closePresetMenu() {
+  const menu = document.getElementById('preset-menu');
+  if (!menu) return;
+
+  menu.classList.remove('show');
+}
+
+function handlePresetMenuAction(action) {
+  closePresetMenu();
+
+  if (action === 'import') {
+    triggerImportPreset();
+    return;
+  }
+
+  if (action === 'export') {
+    exportPositionPreset();
+  }
+}
+
+document.addEventListener('click', function (event) {
+  const wrapper = document.querySelector('.preset-menu-wrapper');
+  if (wrapper && wrapper.contains(event.target)) return;
+
+  closePresetMenu();
+});
 
 /**
  * 跳转到站位主页面

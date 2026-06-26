@@ -57,7 +57,7 @@
     btn.id = 'tactics-export-btn';
     btn.className = 'preset-icon-btn';
     btn.title = '保存战术长图';
-    btn.textContent = '存';
+    btn.textContent = '存图';
     btn.onclick = showTacticsExportModal;
 
     actions.appendChild(btn);
