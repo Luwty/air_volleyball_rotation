@@ -5,7 +5,3 @@ Sitemap: https://jerrypeibuilds.github.io/volleyball-setter/sitemap.xml
 
 localStorage.removeItem('air_volleyball_5_custom_ns');
 location.reload();
-
-请继续帮助我调整样式：
-- 移动端，或者是渲染战术图的样式需要调整，球员的圆点可以适当放大一圈，可以比现在的大，比电脑端的稍微小一点
-- 战术图的每个标题增加内容，后面都接对应的分数，比如“第1轮：对应分数”
