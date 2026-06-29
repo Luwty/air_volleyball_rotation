@@ -475,19 +475,29 @@ function updateUI() {
 
   // 更新发球图标和实际站位文字
   // const serveIndicator = document.getElementById('serve-indicator');
-  const actualPosLabel = document.getElementById('actual-pos-label');
-
-  if (actualPosLabel) {
-    actualPosLabel.style.display = gameState.isOriginalPosition ? 'none' : 'inline-flex';
-    actualPosLabel.textContent = getPositionSceneLabel();
-    actualPosLabel.title = '点击切换发球 / 接发球站位';
-  }
+  updateSceneSwitchButtons();
 
   // 新增更新编辑按钮
   updatePositionActionButtons();
 
   // 更新按钮状态
   updateButtonStates();
+}
+
+function updateSceneSwitchButtons() {
+  const serveBtn = document.getElementById('serve-scene-btn');
+  const receiveBtn = document.getElementById('receive-scene-btn');
+  const group = document.getElementById('scene-switch-group');
+
+  if (!serveBtn || !receiveBtn || !group) return;
+
+  const isServe = gameState.positionScene === 'serve';
+  const isVariationMode = !gameState.isOriginalPosition;
+
+  serveBtn.classList.toggle('active', isServe);
+  receiveBtn.classList.toggle('active', !isServe);
+
+  group.classList.toggle('variation-active', isVariationMode);
 }
 
 /**
@@ -655,16 +665,21 @@ function getPositionSceneLabel(scene = gameState.positionScene) {
   return scene === 'receive' ? '接发球站位' : '发球站位';
 }
 
-function togglePositionScene() {
-  if (gameState.isOriginalPosition) return;
+function setPositionScene(scene) {
+  if (!['serve', 'receive'].includes(scene)) return;
 
   if (gameState.isEditingPositions) {
     savePositionDraft();
     exitPositionEdit();
   }
 
-  gameState.positionScene =
-    gameState.positionScene === 'serve' ? 'receive' : 'serve';
+  gameState.positionScene = scene;
+
+  // 推荐：点击发球/接发球按钮时，如果当前是基础模式，自动进入变化模式
+  // 这样用户点击按钮后能立即看到对应站位
+  if (gameState.isOriginalPosition) {
+    gameState.isOriginalPosition = false;
+  }
 
   updateUI();
   renderPlayers();
@@ -681,10 +696,10 @@ function togglePosition() {
 
   gameState.isOriginalPosition = !gameState.isOriginalPosition;
 
-  // 点击“变化”时默认进入发球站位
-  if (!gameState.isOriginalPosition) {
-    gameState.positionScene = 'serve';
-  }
+  // // 点击“变化”时默认进入发球站位
+  // if (!gameState.isOriginalPosition) {
+  //   gameState.positionScene = 'serve';
+  // }
 
   updateUI();
   renderPlayers();

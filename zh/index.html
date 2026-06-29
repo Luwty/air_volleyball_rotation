@@ -103,10 +103,16 @@
         <div class="rotation-info">
           <span class="rotation-label">当前轮次：</span>
           <span class="rotation-value" id="rotation-display">第 1 轮</span>
-          <button class="actual-pos-label actual-pos-switch" id="actual-pos-label" type="button" style="display: none;"
-            onclick="togglePositionScene()">
-            发球站位
-          </button>
+          <div class="scene-switch-group" id="scene-switch-group">
+            <button class="scene-switch-btn active" id="serve-scene-btn" type="button"
+              onclick="setPositionScene('serve')">
+              发球
+            </button>
+
+            <button class="scene-switch-btn" id="receive-scene-btn" type="button" onclick="setPositionScene('receive')">
+              接发
+            </button>
+          </div>
         </div>
       </div>
 
