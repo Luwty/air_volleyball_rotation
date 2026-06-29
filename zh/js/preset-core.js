@@ -48,6 +48,18 @@
         };
     }
 
+    // 转位信息保存
+    function normalizeStartBasePos(value, totalRotations) {
+        const parsed = Number(value);
+        const max = Number(totalRotations) || 5;
+
+        if (Number.isInteger(parsed) && parsed >= 1 && parsed <= max) {
+            return parsed;
+        }
+
+        return 1;
+    }
+
     function normalizePreset(raw) {
         const preset = isPlainObject(raw) ? raw : {};
 
@@ -73,7 +85,13 @@
                 preset.variationPositions || preset.variationCoords
             ),
 
+            startBasePosAtPosition1: normalizeStartBasePos(
+                preset.startBasePosAtPosition1,
+                preset.totalRotations
+            ),
+
             note: typeof preset.note === 'string' ? preset.note : ''
+
         };
     }
 
@@ -93,9 +111,15 @@
                 ? source.setterPositions.slice()
                 : [],
 
+            startBasePosAtPosition1: normalizeStartBasePos(
+                source.startBasePosAtPosition1,
+                source.totalRotations
+            ),
+
             // 只保存球员名和接发球变化站位
             customNames: clone(source.customNames),
             variationPositions: normalizeVariationPositions(source.variationPositions),
+
 
             // 可选备注
             note: String(source.note || '')

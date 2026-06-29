@@ -1714,10 +1714,29 @@ input:checked+.slider:before {
   transform: scale(0.96);
 } */
 
+.picker-sentence-player {
+  gap: 0.75rem;
+}
+
+.player-wheel-container {
+  width: 9rem;
+}
+
+.player-wheel-container .wheel-item {
+  padding: 0 0.5rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 
 /* ========== 移动端球场页压缩 ========== */
 
 @media screen and (max-width: 480px) {
+
+  /* .player-wheel-container {
+    width: 7.5rem;
+  } */
 
   .scene-switch-group {
     margin-left: 0.35rem;

@@ -12,6 +12,16 @@
 const SETTER_POSITIONS = [1, 5, 4, 3, 2];
 const TOTAL_ROTATIONS = SETTER_POSITIONS.length;
 
+// 球员默认配置（图片中的布局）：
+// 1号位：二传，2号位：攻手A，3号位：队员C，4号位：接应，5号位：攻手B，
+const PLAYER_BASE_ROLES = {
+  1: '二传',
+  2: '攻手A',
+  3: '队员C',
+  4: '接应',
+  5: '攻手B'
+};
+
 const LIBERO_CONFIG = {
   enabled: false,
 
@@ -156,17 +166,6 @@ function getPlayerRoleName(baseRoles, basePos, courtPos) {
 function getAllPlayersPositions(rotation) {
   const setterPos = getSetterPosition(rotation);
 
-  // 第1轮的基础配置（图片中的布局）：
-  // 1号位：二传，2号位：主攻，3号位：副攻
-  // 4号位：接应，5号位：主攻，6号位：副攻(自)
-  const baseRoles = {
-    1: '二传',
-    2: '攻手A',
-    3: '自由人',
-    4: '接应',
-    5: '攻手B',
-  };
-
   const players = [];
   const FRONT_POSITIONS = [2, 3, 4];
   const ATTACKER_BASE_POSITIONS = [2, 5]; // 2=攻手A，5=攻手B
@@ -196,7 +195,7 @@ function getAllPlayersPositions(rotation) {
     // 比如：当前 pos=1 (后排右), rotation=2, 则 basePos = (1-1 + 2-1)%6 + 1 = 2 (原来是2号位的人转到了1号位)
     const basePos = getBasePosAtCourtPos(pos);
 
-    let roleName = getPlayerRoleName(baseRoles, basePos, pos);
+    let roleName = getPlayerRoleName(PLAYER_BASE_ROLES, basePos, pos);
 
     // 这个应该是换人导致的,气排球暂时没有换人选项,故直接注释
     // ⚡️ 特殊规则：副攻(3号位起始) 和 接应/副攻(6号位起始) 在后排时变身为“自由”

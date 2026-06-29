@@ -37,6 +37,7 @@
 
             totalRotations: TOTAL_ROTATIONS,
             setterPositions: SETTER_POSITIONS,
+            startBasePosAtPosition1: gameState.rotationOffset + 1,
 
             customNames: gameState.customNames || {},
             variationPositions: gameState.customPositions || {},
@@ -129,6 +130,15 @@
         gameState.formationTitle = preset.title || '未命名站位';
         gameState.customNames = preset.customNames || {};
         gameState.customPositions = preset.variationPositions || {};
+
+        if (preset.startBasePosAtPosition1) {
+            gameState.rotationOffset = preset.startBasePosAtPosition1 - 1;
+            localStorage.setItem(
+                START_BASE_POS_KEY,
+                String(preset.startBasePosAtPosition1)
+            );
+        }
+
         gameState.draftPositions = {};
         gameState.isEditingPositions = false;
 
