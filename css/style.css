@@ -1077,6 +1077,17 @@ body {
   transform: scale(1.05);
 }
 
+.rotation-value.restartable {
+  cursor: pointer;
+  border-bottom: none;
+  transition: all 0.3s ease;
+}
+
+.rotation-value.restartable:hover {
+  color: #E91E63;
+  transform: scale(1.05);
+}
+
 /* ========== 控制面板 ========== */
 
 .control-panel {

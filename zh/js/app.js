@@ -476,17 +476,26 @@ function updateUI() {
   if (rotationDisplay) {
     rotationDisplay.textContent = `第 ${gameState.currentRotation} 轮`;
 
-    // ⚡️ 交互逻辑：如果是第1轮，允许点击设置起始位置
-    if (gameState.currentRotation === 1 && !gameState.isAnimating) {
-      rotationDisplay.classList.add('clickable');
-      rotationDisplay.onclick = function () {
-        showStartPosModal();
-      };
-      rotationDisplay.title = "点击设置谁从1号位开始";
-    } else {
-      rotationDisplay.classList.remove('clickable');
-      rotationDisplay.onclick = null;
-      rotationDisplay.title = "";
+    rotationDisplay.classList.remove('clickable', 'restartable');
+    rotationDisplay.onclick = null;
+    rotationDisplay.title = '';
+
+    if (!gameState.isAnimating) {
+      if (gameState.currentRotation === 1) {
+        // 第1轮：点击设置谁从1号位开始，保留下划线样式
+        rotationDisplay.classList.add('clickable');
+        rotationDisplay.onclick = function () {
+          showStartPosModal();
+        };
+        rotationDisplay.title = '点击设置谁从1号位开始';
+      } else {
+        // 第2~5轮：点击回到第1轮，但不加下划线
+        rotationDisplay.classList.add('restartable');
+        rotationDisplay.onclick = function () {
+          restartToFirstRotation();
+        };
+        rotationDisplay.title = '点击回到第1轮';
+      }
     }
   }
 
@@ -556,8 +565,9 @@ function updateButtonStates() {
   const nextBtn = document.getElementById('next-btn');
   const nextBtnText = document.getElementById('next-btn-text');
 
+  // 不再禁用“上一轮”
   if (prevBtn) {
-    if (gameState.currentRotation === 1 || gameState.isAnimating) {
+    if (gameState.isAnimating) {
       prevBtn.classList.add('btn-disabled');
     } else {
       prevBtn.classList.remove('btn-disabled');
@@ -571,13 +581,24 @@ function updateButtonStates() {
     } else {
       nextBtn.classList.remove('btn-disabled');
       if (nextBtnText) {
-        nextBtnText.textContent = gameState.currentRotation === TOTAL_ROTATIONS ? '重新开始' : '下一轮 ▶';
+        nextBtnText.textContent = '下一轮 ▶';
       }
     }
   }
 }
 
 // ========== 轮转控制函数 ==========
+
+function restartToFirstRotation() {
+  if (gameState.isAnimating || gameState.currentRotation === 1) {
+    return;
+  }
+
+  gameState.isAnimating = true;
+  updateButtonStates();
+
+  playRotationAnimation(1);
+}
 
 /**
  * 下一轮
@@ -604,14 +625,17 @@ function nextRotation() {
  * 上一轮
  */
 function prevRotation() {
-  if (gameState.isAnimating || gameState.currentRotation === 1) {
+  if (gameState.isAnimating) {
     return;
   }
 
   gameState.isAnimating = true;
   updateButtonStates();
 
-  const prevRot = gameState.currentRotation - 1;
+  const prevRot = gameState.currentRotation === 1
+    ? TOTAL_ROTATIONS
+    : gameState.currentRotation - 1;
+
   playRotationAnimation(prevRot);
 }
 
