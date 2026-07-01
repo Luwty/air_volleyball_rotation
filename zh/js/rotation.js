@@ -198,7 +198,8 @@ function getAllPlayersPositions(rotation) {
     //   isHighlight = true;
     // }
 
-    const isHighlight = FRONT_POSITIONS.includes(pos) && basePos === highlightedAttackerBasePos;
+    const isHighlight = false
+    // const isHighlight = FRONT_POSITIONS.includes(pos) && basePos === highlightedAttackerBasePos;
 
     // 获取实际站位坐标（如果配置了ACTUAL_POSITIONS，否则使用标准坐标）
     let actualCoords = POSITION_COORDS[pos];
