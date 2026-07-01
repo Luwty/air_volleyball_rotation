@@ -418,18 +418,34 @@
   function drawPlayer(ctx, courtX, courtY, courtWidth, courtHeight, player, coords) {
     const cx = courtX + (coords.x / 100) * courtWidth;
     const cy = courtY + (coords.y / 100) * courtHeight;
-    const radius = Math.max(32, courtWidth * 0.073); // 球员大小调整
+    const radius = Math.max(36, courtWidth * 0.08); // 球员大小调整
 
     const isHighlight = player.role === 'setter';
+    // const isHighlight = player.role === 'setter';
 
     const gradient = ctx.createLinearGradient(cx - radius, cy - radius, cx + radius, cy + radius);
-    if (isHighlight) {
-      gradient.addColorStop(0, '#FFD54F');
-      gradient.addColorStop(1, '#FFC107');
-    } else {
-      gradient.addColorStop(0, '#90A4AE');
-      gradient.addColorStop(1, '#546E7A');
-    }
+    // if (isHighlight) {
+    //   gradient.addColorStop(0, '#FFD54F');
+    //   gradient.addColorStop(1, '#FFC107');
+    // } else {
+    //   gradient.addColorStop(0, '#90A4AE');
+    //   gradient.addColorStop(1, '#546E7A');
+    // }
+
+    const PLAYER_EXPORT_COLORS = {
+      1: ['#BFECC8', '#7EDC9A'],
+      2: ['#BFE3FF', '#7AB8F5'],
+      3: ['#FFEAA7', '#F7D66B'],
+      4: ['#FFD1A8', '#F5A461'],
+      5: ['#D9C2FF', '#B48AF5'],
+    };
+
+    const basePos = Number(player.id.replace('player-base-', ''));
+    const colors = PLAYER_EXPORT_COLORS[basePos] || ['#90A4AE', '#546E7A'];
+
+    gradient.addColorStop(0, colors[0]);
+    gradient.addColorStop(1, colors[1]);
+
 
     ctx.fillStyle = gradient;
     ctx.beginPath();
@@ -440,8 +456,8 @@
     ctx.lineWidth = 4;
     ctx.stroke();
 
-    ctx.fillStyle = '#FFFFFF';
-    ctx.font = `bold ${Math.round(radius * 0.46)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
+    ctx.fillStyle = '#333333';
+    ctx.font = `bold ${Math.round(radius * 0.5)}px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
