@@ -12,6 +12,28 @@
 const SETTER_POSITIONS = [1, 5, 4, 3, 2];
 const TOTAL_ROTATIONS = SETTER_POSITIONS.length;
 
+// 球员默认配置（图片中的布局）：
+// 1号位：二传，2号位：攻手A，3号位：队员C，4号位：接应，5号位：攻手B，
+const PLAYER_BASE_ROLES = {
+  1: '二传',
+  2: '攻手A',
+  3: '队员C',
+  4: '接应',
+  5: '攻手B'
+};
+
+const LIBERO_CONFIG = {
+  enabled: false,
+
+  // 未来如果启用自由人，可以配置谁在后排变成自由人
+  replaceBasePositions: [3],
+
+  // 五人气排球后排位置
+  backRowPositions: [1, 5],
+
+  liberoNameKey: 'libero',
+  liberoDisplayName: '自由人'
+};
 
 /**
  * 6个位置的坐标配置（百分比，相对于球场容器）
@@ -112,23 +134,37 @@ function getStatusText(rotation, position, isFrontRow) {
 }
 
 /**
+ * 身份解析函数
+ */
+function shouldUseLibero(basePos, courtPos) {
+  return LIBERO_CONFIG.enabled &&
+    LIBERO_CONFIG.replaceBasePositions.includes(basePos) &&
+    LIBERO_CONFIG.backRowPositions.includes(courtPos);
+}
+
+function getPlayerNameKey(basePos, courtPos) {
+  if (shouldUseLibero(basePos, courtPos)) {
+    return LIBERO_CONFIG.liberoNameKey;
+  }
+
+  return `player-base-${basePos}`;
+}
+
+function getPlayerRoleName(baseRoles, basePos, courtPos) {
+  if (shouldUseLibero(basePos, courtPos)) {
+    return LIBERO_CONFIG.liberoDisplayName;
+  }
+
+  return baseRoles[basePos];
+}
+
+/**
  * 获取所有球员的初始位置（根据第1轮反轮配置）
  * @param {number} rotation - 当前轮次
  * @returns {array} 球员位置数组
  */
 function getAllPlayersPositions(rotation) {
   const setterPos = getSetterPosition(rotation);
-
-  // 第1轮的基础配置（图片中的布局）：
-  // 1号位：二传，2号位：主攻，3号位：副攻
-  // 4号位：接应，5号位：主攻，6号位：副攻(自)
-  const baseRoles = {
-    1: '二传',
-    2: '攻手A',
-    3: '自由人',
-    4: '接应',
-    5: '攻手B',
-  };
 
   const players = [];
   const FRONT_POSITIONS = [2, 3, 4];
@@ -159,7 +195,7 @@ function getAllPlayersPositions(rotation) {
     // 比如：当前 pos=1 (后排右), rotation=2, 则 basePos = (1-1 + 2-1)%6 + 1 = 2 (原来是2号位的人转到了1号位)
     const basePos = getBasePosAtCourtPos(pos);
 
-    let roleName = baseRoles[basePos];
+    let roleName = getPlayerRoleName(PLAYER_BASE_ROLES, basePos, pos);
 
     // 这个应该是换人导致的,气排球暂时没有换人选项,故直接注释
     // ⚡️ 特殊规则：副攻(3号位起始) 和 接应/副攻(6号位起始) 在后排时变身为“自由”
@@ -207,11 +243,12 @@ function getAllPlayersPositions(rotation) {
       actualCoords = ACTUAL_POSITIONS[rotation][pos];
     }
 
-    // 名字键：后排副攻(3/6号身份)被自由人替换，统一用 libero 身份共享名字
-    let nameKey = `player-base-${basePos}`;
-    if ((basePos === 3) && [1, 5].includes(pos)) {
-      nameKey = 'libero';
-    }
+    // 默认五人气排球：球员身份不随位置变化，名字始终绑定到起始身份
+    let nameKey = getPlayerNameKey(basePos, pos);
+    // let nameKey = `player-base-${basePos}`;
+    // if ((basePos === 3) && [1, 5].includes(pos)) {
+    //   nameKey = 'libero';
+    // }
 
     players.push({
       // ⚡️ 确保添加 id 字段

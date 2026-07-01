@@ -36,6 +36,8 @@ const CUSTOM_POSITIONS_KEY = 'air_volleyball_5_custom_positions';
 const DRAWER_NOTE_KEY = 'air_volleyball_5_drawer_note';
 // const CUSTOM_BASE_COORDS_KEY = 'air_volleyball_5_base_coords';
 const FORMATION_TITLE_KEY = 'air_volleyball_5_formation_title';
+
+const START_BASE_POS_KEY = 'air_volleyball_5_start_base_pos';
 // const PRESET_SCHEMA_VERSION = 1;
 
 
@@ -139,6 +141,18 @@ function saveFormationTitle() {
   localStorage.setItem(FORMATION_TITLE_KEY, title);
 }
 
+function loadStartBasePos() {
+  const saved = Number(localStorage.getItem(START_BASE_POS_KEY));
+
+  if (Number.isInteger(saved) && saved >= 1 && saved <= TOTAL_ROTATIONS) {
+    gameState.rotationOffset = saved - 1;
+  }
+}
+
+function saveStartBasePos(basePos) {
+  localStorage.setItem(START_BASE_POS_KEY, String(basePos));
+}
+
 // ========== 自定义名字持久化（localStorage，刷新不丢） ==========
 function loadCustomNames() {
   try {
@@ -156,6 +170,9 @@ function saveCustomNames() {
 // ========== 页面初始化 ==========
 document.addEventListener('DOMContentLoaded', function () {
   console.log('排球站位教学 - Web版已加载');
+
+  loadStartBasePos();
+
   loadCustomNames();
   loadCustomPositions();
   loadDrawerNote();
@@ -459,35 +476,54 @@ function updateUI() {
   if (rotationDisplay) {
     rotationDisplay.textContent = `第 ${gameState.currentRotation} 轮`;
 
-    // ⚡️ 交互逻辑：如果是第1轮，允许点击设置起始位置
-    if (gameState.currentRotation === 1 && !gameState.isAnimating) {
-      rotationDisplay.classList.add('clickable');
-      rotationDisplay.onclick = function () {
-        showStartPosModal();
-      };
-      rotationDisplay.title = "点击设置二传起始位置";
-    } else {
-      rotationDisplay.classList.remove('clickable');
-      rotationDisplay.onclick = null;
-      rotationDisplay.title = "";
+    rotationDisplay.classList.remove('clickable', 'restartable');
+    rotationDisplay.onclick = null;
+    rotationDisplay.title = '';
+
+    if (!gameState.isAnimating) {
+      if (gameState.currentRotation === 1) {
+        // 第1轮：点击设置谁从1号位开始，保留下划线样式
+        rotationDisplay.classList.add('clickable');
+        rotationDisplay.onclick = function () {
+          showStartPosModal();
+        };
+        rotationDisplay.title = '点击设置谁从1号位开始';
+      } else {
+        // 第2~5轮：点击回到第1轮，但不加下划线
+        rotationDisplay.classList.add('restartable');
+        rotationDisplay.onclick = function () {
+          restartToFirstRotation();
+        };
+        rotationDisplay.title = '点击回到第1轮';
+      }
     }
   }
 
   // 更新发球图标和实际站位文字
   // const serveIndicator = document.getElementById('serve-indicator');
-  const actualPosLabel = document.getElementById('actual-pos-label');
-
-  if (actualPosLabel) {
-    actualPosLabel.style.display = gameState.isOriginalPosition ? 'none' : 'inline-flex';
-    actualPosLabel.textContent = getPositionSceneLabel();
-    actualPosLabel.title = '点击切换发球 / 接发球站位';
-  }
+  updateSceneSwitchButtons();
 
   // 新增更新编辑按钮
   updatePositionActionButtons();
 
   // 更新按钮状态
   updateButtonStates();
+}
+
+function updateSceneSwitchButtons() {
+  const serveBtn = document.getElementById('serve-scene-btn');
+  const receiveBtn = document.getElementById('receive-scene-btn');
+  const group = document.getElementById('scene-switch-group');
+
+  if (!serveBtn || !receiveBtn || !group) return;
+
+  const isServe = gameState.positionScene === 'serve';
+  const isVariationMode = !gameState.isOriginalPosition;
+
+  serveBtn.classList.toggle('active', isServe);
+  receiveBtn.classList.toggle('active', !isServe);
+
+  group.classList.toggle('variation-active', isVariationMode);
 }
 
 /**
@@ -529,8 +565,9 @@ function updateButtonStates() {
   const nextBtn = document.getElementById('next-btn');
   const nextBtnText = document.getElementById('next-btn-text');
 
+  // 不再禁用“上一轮”
   if (prevBtn) {
-    if (gameState.currentRotation === 1 || gameState.isAnimating) {
+    if (gameState.isAnimating) {
       prevBtn.classList.add('btn-disabled');
     } else {
       prevBtn.classList.remove('btn-disabled');
@@ -544,13 +581,24 @@ function updateButtonStates() {
     } else {
       nextBtn.classList.remove('btn-disabled');
       if (nextBtnText) {
-        nextBtnText.textContent = gameState.currentRotation === TOTAL_ROTATIONS ? '重新开始' : '下一轮 ▶';
+        nextBtnText.textContent = '下一轮 ▶';
       }
     }
   }
 }
 
 // ========== 轮转控制函数 ==========
+
+function restartToFirstRotation() {
+  if (gameState.isAnimating || gameState.currentRotation === 1) {
+    return;
+  }
+
+  gameState.isAnimating = true;
+  updateButtonStates();
+
+  playRotationAnimation(1);
+}
 
 /**
  * 下一轮
@@ -577,14 +625,17 @@ function nextRotation() {
  * 上一轮
  */
 function prevRotation() {
-  if (gameState.isAnimating || gameState.currentRotation === 1) {
+  if (gameState.isAnimating) {
     return;
   }
 
   gameState.isAnimating = true;
   updateButtonStates();
 
-  const prevRot = gameState.currentRotation - 1;
+  const prevRot = gameState.currentRotation === 1
+    ? TOTAL_ROTATIONS
+    : gameState.currentRotation - 1;
+
   playRotationAnimation(prevRot);
 }
 
@@ -655,16 +706,21 @@ function getPositionSceneLabel(scene = gameState.positionScene) {
   return scene === 'receive' ? '接发球站位' : '发球站位';
 }
 
-function togglePositionScene() {
-  if (gameState.isOriginalPosition) return;
+function setPositionScene(scene) {
+  if (!['serve', 'receive'].includes(scene)) return;
 
   if (gameState.isEditingPositions) {
     savePositionDraft();
     exitPositionEdit();
   }
 
-  gameState.positionScene =
-    gameState.positionScene === 'serve' ? 'receive' : 'serve';
+  gameState.positionScene = scene;
+
+  // 推荐：点击发球/接发球按钮时，如果当前是基础模式，自动进入变化模式
+  // 这样用户点击按钮后能立即看到对应站位
+  if (gameState.isOriginalPosition) {
+    gameState.isOriginalPosition = false;
+  }
 
   updateUI();
   renderPlayers();
@@ -681,10 +737,10 @@ function togglePosition() {
 
   gameState.isOriginalPosition = !gameState.isOriginalPosition;
 
-  // 点击“变化”时默认进入发球站位
-  if (!gameState.isOriginalPosition) {
-    gameState.positionScene = 'serve';
-  }
+  // // 点击“变化”时默认进入发球站位
+  // if (!gameState.isOriginalPosition) {
+  //   gameState.positionScene = 'serve';
+  // }
 
   updateUI();
   renderPlayers();
@@ -708,7 +764,58 @@ function updateCourtLabels() {
 
 // ========== 开轮设置模态框控制 ==========
 
-let currentWheelPos = 1; // 当前滚轮选中的位置
+
+let currentWheelBasePos = 1; // 当前滚轮选中的位置
+
+// 替换滚轮渲染逻辑
+function renderStartPlayerWheel() {
+  const wheel = document.getElementById('pos-wheel');
+  if (!wheel) return;
+
+  wheel.innerHTML = '';
+
+  const topPlaceholder = document.createElement('div');
+  topPlaceholder.className = 'wheel-item placeholder';
+  wheel.appendChild(topPlaceholder);
+
+  for (let basePos = 1; basePos <= TOTAL_ROTATIONS; basePos++) {
+    const item = document.createElement('div');
+
+    item.className = 'wheel-item';
+    item.dataset.val = String(basePos);
+    item.textContent = getBasePlayerName(basePos);
+    item.title = getBasePlayerName(basePos);
+
+    item.onclick = function () {
+      wheel.scrollTo({
+        top: (basePos - 1) * 50,
+        behavior: 'smooth'
+      });
+    };
+
+    wheel.appendChild(item);
+  }
+
+  const bottomPlaceholder = document.createElement('div');
+  bottomPlaceholder.className = 'wheel-item placeholder';
+  wheel.appendChild(bottomPlaceholder);
+}
+
+// 获取球员显示名函数
+function getBasePlayerName(basePos) {
+  const nameKey = `player-base-${basePos}`;
+
+  return (
+    gameState.customNames[nameKey] ||
+    PLAYER_BASE_ROLES[basePos] ||
+    `队员${basePos}`
+  );
+}
+
+function getCurrentStartBasePos() {
+  return gameState.rotationOffset + 1;
+}
+
 
 function showStartPosModal() {
   const modal = document.getElementById('start-pos-modal');
@@ -729,35 +836,17 @@ function closeStartPosModal() {
 
 // 初始化滚轮：滚动到当前 offset 对应的位置
 function initWheelPosition() {
-  // const SETTER_POSITIONS_REF = [1, 6, 5, 4, 3, 2]; //不再重复定义
-  const currentStartPos = SETTER_POSITIONS[gameState.rotationOffset];
+  renderStartPlayerWheel();
 
   const wheel = document.getElementById('pos-wheel');
   if (!wheel) return;
 
-  const items = wheel.querySelectorAll('.wheel-item:not(.placeholder)');
-  let targetIndex = 0;
+  const currentStartBasePos = getCurrentStartBasePos();
+  const targetIndex = currentStartBasePos - 1;
 
-  // 绑定点击事件：点击即滚动到该位置
-  items.forEach((item, index) => {
-    // 设置点击事件
-    item.onclick = function () {
-      wheel.scrollTo({
-        top: index * 50, // 50px 是新高度
-        behavior: 'smooth'
-      });
-    };
-
-    if (parseInt(item.dataset.val) === currentStartPos) {
-      targetIndex = index;
-    }
-  });
-
-  // 滚动到该位置 (50px 是每项高度)
-  // 使用 setTimeout 确保模态框渲染后再滚动，否则 scrollTop 可能无效
   setTimeout(() => {
     wheel.scrollTop = targetIndex * 50;
-    checkWheelSelection(); // 手动触发一次高亮更新
+    checkWheelSelection();
   }, 100);
 }
 
@@ -766,8 +855,7 @@ function checkWheelSelection() {
   const wheel = document.getElementById('pos-wheel');
   if (!wheel) return;
 
-  const itemHeight = 50; // ⚡️ 更新为 50px
-  // 计算当前滚动到了第几项 (四舍五入)
+  const itemHeight = 50;
   const scrollIndex = Math.round(wheel.scrollTop / itemHeight);
 
   const items = wheel.querySelectorAll('.wheel-item:not(.placeholder)');
@@ -775,7 +863,7 @@ function checkWheelSelection() {
   items.forEach((item, index) => {
     if (index === scrollIndex) {
       item.classList.add('active');
-      currentWheelPos = parseInt(item.dataset.val);
+      currentWheelBasePos = Number(item.dataset.val);
     } else {
       item.classList.remove('active');
     }
@@ -784,29 +872,30 @@ function checkWheelSelection() {
 
 // 确认选择
 function confirmWheelSelection() {
-  setStartingPosition(currentWheelPos);
+  setStartBasePlayerAtPositionOne(currentWheelBasePos);
 }
-
 /**
- * 设置二传起始位置
- * @param {number} pos - 用户选择的位置 (1-6)
+ * 设置起始位置1
+ * @param {number} basePos - 用户选择的位置 (1-5)
  */
-function setStartingPosition(pos) {
-  // 计算 offset
-  // SETTER_POSITIONS = [1, 6, 5, 4, 3, 2]
-  // const SETTER_POSITIONS_REF = [1, 6, 5, 4, 3, 2];
-  const newOffset = SETTER_POSITIONS.indexOf(pos);
+function setStartBasePlayerAtPositionOne(basePos) {
+  const parsedBasePos = Number(basePos);
 
-  if (newOffset !== -1) {
-    gameState.rotationOffset = newOffset;
-    console.log(`设置二传起始位置为: ${pos}号位, Offset: ${newOffset}`);
-
-    // 关闭模态框
-    closeStartPosModal();
-
-    // 重新初始化页面（刷新站位）
-    initSetterPage();
+  if (!Number.isInteger(parsedBasePos) ||
+    parsedBasePos < 1 ||
+    parsedBasePos > TOTAL_ROTATIONS) {
+    return;
   }
+
+  gameState.rotationOffset = parsedBasePos - 1;
+  saveStartBasePos(parsedBasePos);
+
+  console.log(
+    `设置 ${getBasePlayerName(parsedBasePos)} 从1号位开始, Offset: ${gameState.rotationOffset}`
+  );
+
+  closeStartPosModal();
+  initSetterPage();
 }
 
 // 点击模态框背景关闭 (扩充原有的 window.onclick)

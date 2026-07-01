@@ -103,10 +103,16 @@
         <div class="rotation-info">
           <span class="rotation-label">当前轮次：</span>
           <span class="rotation-value" id="rotation-display">第 1 轮</span>
-          <button class="actual-pos-label actual-pos-switch" id="actual-pos-label" type="button" style="display: none;"
-            onclick="togglePositionScene()">
-            发球站位
-          </button>
+          <div class="scene-switch-group" id="scene-switch-group">
+            <button class="scene-switch-btn active" id="serve-scene-btn" type="button"
+              onclick="setPositionScene('serve')">
+              发球
+            </button>
+
+            <button class="scene-switch-btn" id="receive-scene-btn" type="button" onclick="setPositionScene('receive')">
+              接发
+            </button>
+          </div>
         </div>
       </div>
 
@@ -180,26 +186,16 @@
       </div>
       <div class="modal-body picker-body">
 
-        <div class="picker-sentence">
-          <span>你想要让二传在</span>
+        <div class="picker-sentence picker-sentence-player">
+          <span>你想要谁从1号位开始：</span>
 
-          <!-- 滚轮组件 -->
-          <div class="wheel-container">
-            <div class="wheel-highlight"></div> <!-- 中间的高亮框 -->
+          <div class="wheel-container player-wheel-container">
+            <div class="wheel-highlight"></div>
+
             <div class="wheel-scroll" id="pos-wheel" onscroll="checkWheelSelection()">
-              <!-- 前后加空项是为了让数字能滚到正中间 -->
-              <div class="wheel-item placeholder"></div>
-              <!-- 顺序：1, 6, 5, 4, 3, 2 (对应 offset 0, 1, 2, 3, 4, 5) -->
-              <div class="wheel-item" data-val="1">1</div>
-              <div class="wheel-item" data-val="5">5</div>
-              <div class="wheel-item" data-val="4">4</div>
-              <div class="wheel-item" data-val="3">3</div>
-              <div class="wheel-item" data-val="2">2</div>
-              <div class="wheel-item placeholder"></div>
+              <!-- 这里由 JS 动态渲染当前五个球员姓名 -->
             </div>
           </div>
-
-          <span>号位开始？</span>
         </div>
 
         <div class="btn btn-primary btn-small" onclick="confirmWheelSelection()"
